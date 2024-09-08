@@ -7,6 +7,8 @@ const deleteNodeOption = document.getElementById('deleteNode');
 const clearGraphButton = document.getElementById('clearGraphButton');
 const setFuenteOption = document.getElementById('setFuente'); // Option for Fuente
 const setSumideroOption = document.getElementById('setSumidero'); // Option for Sumidero
+const logsDiv = document.getElementById('logs');
+const iniciarAlgoritmoButton = document.getElementById('iniciarAlgoritmo');
 
 //edges
 const contextMenuNode = document.getElementById('contextMenuNode');
@@ -22,6 +24,7 @@ let isDragging = false;
 let nodeToConnect = null;
 let fuenteNode = null; // Track the current "Fuente" node
 let sumideroNode = null; // Track the current "Sumidero" node
+let algorithmStarted = false;
 
 canvas.addEventListener('dblclick', addNode);
 canvas.addEventListener('click', selectNode);
@@ -41,6 +44,7 @@ editEdgeLabelOption.addEventListener('click', editEdgeLabel);
 deleteEdgeOption.addEventListener('click', deleteEdge);
 
 clearGraphButton.addEventListener('click', clearGraph);
+iniciarAlgoritmoButton.addEventListener('click', iniciarAlgoritmo);
 
 function addNode(event) {
     const x = event.offsetX;
@@ -98,9 +102,19 @@ function isPositiveInteger(value) {
 
 function connectNodes() {
     if (nodeToConnect) {
+        if (nodeToConnect === selectedNode) {
+            // Cancel the connection
+            nodeToConnect = null;
+            connectNodeOption.textContent = 'Connect Node';
+            contextMenu.style.display = 'none'; // Hide the context menu
+            draw();
+            return;
+        }
         if (edges.some(edge => edge.startNode === nodeToConnect && edge.endNode === selectedNode)) {
             alert('An edge already exists between these nodes.');
             nodeToConnect = null;
+            connectNodeOption.textContent = 'Connect Node';
+            contextMenu.style.display = 'none'; // Hide the context menu
             draw();
             return;
         }
@@ -109,19 +123,27 @@ function connectNodes() {
             edgeLabel = prompt('Enter edge label (positive integer):', '');
             if (edgeLabel === null) {
                 nodeToConnect = null;
+                connectNodeOption.textContent = 'Connect Node';
+                contextMenu.style.display = 'none'; // Hide the context menu
                 draw();
                 return;
             }
         } while (!isPositiveInteger(edgeLabel));
 
-        edges.push({ startNode: nodeToConnect, endNode: selectedNode, label: edgeLabel });
+        // Store both directions internally
+        edges.push({ startNode: nodeToConnect, endNode: selectedNode, label: edgeLabel, starting: nodeToConnect });
+        edges.push({ startNode: selectedNode, endNode: nodeToConnect, label: edgeLabel, starting: nodeToConnect });
+
         nodeToConnect = null;
+        connectNodeOption.textContent = 'Connect Node';
+        contextMenu.style.display = 'none'; // Hide the context menu
         draw();
     } else {
         nodeToConnect = selectedNode;
+        connectNodeOption.textContent = 'Cancel connection';
+        contextMenu.style.display = 'none'; // Hide the context menu
         draw();
     }
-    contextMenu.style.display = 'none';
 }
 
 function getNodeAt(x, y) {
@@ -163,21 +185,56 @@ canvas.addEventListener('click', () => {
     contextMenuEdge.style.display = 'none';
 });
 
-canvas.addEventListener('contextmenu', function(event) {
+canvas.addEventListener('contextmenu', function (event) {
     const x = event.offsetX;
     const y = event.offsetY;
 
     if (getEdgeAt(x, y)) {
-        showEdgeContextMenu(event);
+        showContextMenu(event);
     } else if (getNodeAt(x, y)) {
-        showNodeContextMenu(event);
+        showContextMenu(event);
     } else {
         contextMenuNode.style.display = 'none';
         contextMenuEdge.style.display = 'none';
     }
 });
 
+canvas.addEventListener('contextmenu', function(event) {
+    event.preventDefault();
+    if (algorithmStarted) {
+        return; // Do not open context menu if algorithm has started
+    }
+    // Existing context menu logic
+    const mouseX = event.clientX - canvas.getBoundingClientRect().left;
+    const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+    selectedNode = getNodeAt(mouseX, mouseY);
+    if (selectedNode) {
+        contextMenu.style.left = `${event.clientX}px`;
+        contextMenu.style.top = `${event.clientY}px`;
+        contextMenu.style.display = 'block';
+    }
+});
+
+document.addEventListener('click', function (event) {
+    if (!contextMenu.contains(event.target) && !contextMenuEdge.contains(event.target)) {
+        contextMenu.style.display = 'none';
+        contextMenuEdge.style.display = 'none';
+    }
+});
+
+// Modify the existing canvas click event listener to close context menus
+canvas.addEventListener('click', (event) => {
+    if (!contextMenu.contains(event.target) && !contextMenuEdge.contains(event.target)) {
+        contextMenu.style.display = 'none';
+        contextMenuEdge.style.display = 'none';
+    }
+});
+
+
 function showContextMenu(event) {
+    if (algorithmStarted) {
+        return; // Disable context menu when algorithm has started
+    }
     event.preventDefault();
     const x = event.offsetX;
     const y = event.offsetY;
@@ -211,6 +268,7 @@ function showContextMenu(event) {
     }
 }
 
+
 function toggleFuenteNode() {
     if (selectedNode) {
         if (selectedNode.isFuente) {
@@ -219,6 +277,10 @@ function toggleFuenteNode() {
         } else {
             if (fuenteNode) {
                 fuenteNode.isFuente = false;
+            }
+            if (selectedNode.isSumidero) {
+                selectedNode.isSumidero = false;
+                sumideroNode = null;
             }
             selectedNode.isFuente = true;
             fuenteNode = selectedNode;
@@ -236,6 +298,10 @@ function toggleSumideroNode() {
         } else {
             if (sumideroNode) {
                 sumideroNode.isSumidero = false;
+            }
+            if (selectedNode.isFuente) {
+                selectedNode.isFuente = false;
+                fuenteNode = null;
             }
             selectedNode.isSumidero = true;
             sumideroNode = selectedNode;
@@ -271,50 +337,65 @@ function drawNode(node) {
 }
 
 function drawEdge(edge) {
-    const { startNode, endNode, label } = edge;
+    const { startNode, endNode, label, flujo, starting } = edge;
     const angle = Math.atan2(endNode.y - startNode.y, endNode.x - startNode.x);
     const startX = startNode.x + 20 * Math.cos(angle);
     const startY = startNode.y + 20 * Math.sin(angle);
     const endX = endNode.x - 20 * Math.cos(angle);
     const endY = endNode.y - 20 * Math.sin(angle);
 
-    ctx.strokeStyle = 'white';
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.stroke();
+    // Draw the edge line only if it matches the original direction
+    if (starting === startNode) {
+        ctx.strokeStyle = 'white';
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
 
-    const arrowLength = 10;
-    const arrowWidth = 7;
+        // Draw the arrowhead
+        const arrowLength = 10;
+        const arrowWidth = 7;
 
-    ctx.beginPath();
-    ctx.moveTo(endX, endY);
-    ctx.lineTo(
-        endX - arrowLength * Math.cos(angle - Math.PI / 6),
-        endY - arrowLength * Math.sin(angle - Math.PI / 6)
-    );
-    ctx.lineTo(
-        endX - arrowLength * Math.cos(angle + Math.PI / 6),
-        endY - arrowLength * Math.sin(angle + Math.PI / 6)
-    );
-    ctx.closePath();
-    ctx.fillStyle = 'white';
-    ctx.fill();
-
-    if (label) {
-        const midX = (startX + endX) / 2;
-        const midY = (startY + endY) / 2;
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(
+            endX - arrowLength * Math.cos(angle - Math.PI / 6),
+            endY - arrowLength * Math.sin(angle - Math.PI / 6)
+        );
+        ctx.lineTo(
+            endX - arrowLength * Math.cos(angle + Math.PI / 6),
+            endY - arrowLength * Math.sin(angle + Math.PI / 6)
+        );
+        ctx.closePath();
         ctx.fillStyle = 'white';
-        ctx.fillText(label, midX, midY);
-    }
-}
+        ctx.fill();
 
-function deleteNode() {
-    if (!selectedNode) return;
-    nodes = nodes.filter(node => node !== selectedNode);
-    edges = edges.filter(edge => edge.startNode !== selectedNode && edge.endNode !== selectedNode);
-    draw();
-    contextMenu.style.display = 'none';
+        // Draw the label with capacity/flujo
+        if (label) {
+            const midX = (startX + endX) / 2;
+            const midY = (startY + endY) / 2;
+
+            // Save the current context state
+            ctx.save();
+
+            // Set font size and outline for the label
+            ctx.font = '16px Arial'; // Increase font size
+            ctx.lineWidth = 3; // Set outline width
+            ctx.strokeStyle = 'black'; // Set outline color
+            ctx.fillStyle = 'white'; // Set fill color
+
+            if (typeof flujo !== 'undefined') {
+                ctx.strokeText(`${label}/${flujo}`, midX, midY);
+                ctx.fillText(`${label}/${flujo}`, midX, midY);
+            } else {
+                ctx.strokeText(label, midX, midY);
+                ctx.fillText(label, midX, midY);
+            }
+
+            // Restore the context state to avoid affecting other drawings
+            ctx.restore();
+        }
+    }
 }
 
 function clearGraph() {
@@ -322,3 +403,43 @@ function clearGraph() {
     edges = [];
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
+
+function iniciarAlgoritmo() {
+    // Check if there are nodes, fuente, and sumidero
+    if (nodes.length === 0) {
+        alert('No hay nodos en el grafo.');
+        return;
+    }
+
+    if (!fuenteNode) {
+        alert('No se ha seleccionado un nodo fuente.');
+        return;
+    }
+
+    if (!sumideroNode) {
+        alert('No se ha seleccionado un nodo sumidero.');
+        return;
+    }
+
+    // Hide the buttons
+    iniciarAlgoritmoButton.style.display = 'none';
+    clearGraphButton.style.display = 'none';
+
+    // Initialize "Flujo" for each edge
+    edges.forEach(edge => {
+        edge.flujo = 0;
+    });
+
+    // Log the initialization
+    logsDiv.innerHTML += '<p>Inicializando flujos</p>';
+
+    // Update the edge display to show Capacity/Flujo
+    draw();
+
+    algorithmStarted = true;
+
+    // Disable right-click context menu on nodes and edges
+    canvas.removeEventListener('contextmenu', showContextMenu);
+}
+
+
