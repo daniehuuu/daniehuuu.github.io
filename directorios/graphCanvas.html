@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digraph Drawing Tool</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        #contextMenu {
+            display: none;
+            position: absolute;
+            background-color: white;
+            border: 1px solid black;
+            z-index: 1000;
+        }
+        #contextMenu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #contextMenu ul li {
+            padding: 8px;
+            cursor: pointer;
+        }
+        #contextMenu ul li:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="graphCanvas" width="800" height="600"></canvas>
+    <div id="contextMenu">
+        <ul>
+            <li id="changeLabel">Change Label</li>
+            <li id="connectNode">Connect Node</li>
+        </ul>
+    </div>
+    <script src="../js/graph.js"></script>
+</body>
+</html>
