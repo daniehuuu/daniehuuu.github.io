@@ -1,0 +1,54 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: black;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    position: absolute;
+    z-index: 1;
+    color: white;
+    opacity: 0; /* Initially hidden */
+    animation: fadeIn 1s ease-in-out forwards; /* Smooth fade-in effect */
+    animation-delay: 1.5s; /* Delay to match the star animation duration */
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.button {
+    padding: 15px 30px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #007BFF;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
