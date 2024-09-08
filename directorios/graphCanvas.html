@@ -4,37 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digraph Drawing Tool</title>
-    <style>
-        canvas {
-            border: 1px solid black;
-        }
-        #contextMenu {
-            display: none;
-            position: absolute;
-            background-color: white;
-            border: 1px solid black;
-            z-index: 1000;
-        }
-        #contextMenu ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        #contextMenu ul li {
-            padding: 8px;
-            cursor: pointer;
-        }
-        #contextMenu ul li:hover {
-            background-color: #ddd;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/graphCanvas.css">
 </head>
 <body>
     <canvas id="graphCanvas" width="800" height="600"></canvas>
+    <button id="clearGraphButton">Clear Graph</button>
     <div id="contextMenu">
         <ul>
             <li id="changeLabel">Change Label</li>
             <li id="connectNode">Connect Node</li>
+            <li id="deleteNode">Delete Node</li>
+        </ul>
+    </div>
+    <div id="contextMenuEdge">
+        <ul>
+            <li id="editEdgeLabel">Change Label</li>
+            <li id="deleteEdge">Delete Edge</li>
         </ul>
     </div>
     <script src="../js/graph.js"></script>
