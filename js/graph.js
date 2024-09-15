@@ -146,6 +146,14 @@ function connectNodes() {
     }
 }
 
+function deleteNode() {
+    if (!selectedNode) return;
+    nodes = nodes.filter(node => node !== selectedNode);
+    edges = edges.filter(edge => edge.startNode !== selectedNode && edge.endNode !== selectedNode);
+    draw();
+    contextMenu.style.display = 'none';
+}
+
 function getNodeAt(x, y) {
     return nodes.find(node => Math.hypot(node.x - x, node.y - y) < 20);
 }
