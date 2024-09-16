@@ -533,6 +533,7 @@ async function flujo_visualization(){
         while(sumideroNode.value === null){
             if(U.length === 0){
                 console.log("No hay más nodos en U");
+                //draw(); //in order to delete the last etiqueta
                 return sumar_flujo_maximo();
             }
 
