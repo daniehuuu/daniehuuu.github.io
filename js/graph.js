@@ -533,7 +533,10 @@ async function flujo_visualization(){
         while(sumideroNode.value === null){
             if(U.length === 0){
                 console.log("No hay más nodos en U");
-                //draw(); //in order to delete the last etiqueta
+                //delete the etiqueta of fuente
+                fuenteNode.value = null;
+                fuenteNode.predecessor = null;
+                draw(); //in order to delete the last etiqueta
                 return sumar_flujo_maximo();
             }
 
@@ -568,25 +571,43 @@ async function flujo_visualization(){
                     v.predecessor = u.label;
                     U.push(v);
                     draw();
-                    console.log(`${v.label} no está conectado y la capacidad residual es ${residualCapacity}`);
+                    console.log(`${v.label} no está conectado y la capacidad residual es ${edge.label} - ${edge.flujo} = ${residualCapacity}`);
+                    console.log(`Predecesor = ${u.label}. min(${u.value}, ${residualCapacity}) = ${v.value}`);
                     await delay(2500);
                 }
             }
 
             console.log(`Se seleccionan conexiones de algun nodo a ${u.label}: `);
-            await delay(1000);
+            await delay(2000);
             for (let i = 0; i < edges.length; i++) {
                 const edge = edges[i];
                 if (edge.endNode === u && edge.starting !== u) {
                     const v = edge.startNode;
-                    if (edge.flujo > 0 && v.value === null) {
-                        v.value = Math.min(u.value, edge.flujo);
-                        v.predecessor = u.label;
-                        U.push(v);
-                        draw();
-                        await delay(1000);
+                    console.log(`(${v.label}, ${u.label}): `);
+
+                    if(edge.flujo <= 0){
+                        console.log(`El flujo es muy bajo: ${edge.flujo} > 0 (falso)`);
+                        await delay(2000);
+                        continue;
                     }
+
+                    if (v.value !== null) {
+                        console.log(`El nodo ${v.label} ya está etiquetado`);
+                        await delay(2000);
+                        continue;
+                    }
+
+                    v.value = Math.min(u.value, edge.flujo);
+                    v.predecessor = u.label;
+                    U.push(v);
+                    draw();
+                    console.log(`El flujo es mayor que 0 y ${v.label} no está etiquetado`);
+                    console.log(`Predecesor de ${v.label} es ${v.predecessor} y su valor = min(${u.value}, ${edge.flujo}) = ${v.value}`);
+                    await delay(2500);
                 }
+            }
+            if(sumideroNode.value !== null){
+                console.log("Se ha encontrado una trayectoria de la fuente al sumidero");
             }
         }
         let v = sumideroNode;
