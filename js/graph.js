@@ -49,7 +49,16 @@ iniciarAlgoritmoButton.addEventListener('click', iniciarAlgoritmo);
 function addNode(event) {
     const x = event.offsetX;
     const y = event.offsetY;
-    nodes.push({ id: nodes.length, x, y, label: `Node ${nodes.length}`, isFuente: false, isSumidero: false });
+    nodes.push({ 
+        id: nodes.length, 
+        x, 
+        y, 
+        label: `Node ${nodes.length}`, 
+        isFuente: false, 
+        isSumidero: false, 
+        predecessor: null, 
+        value: null 
+    });
     draw();
 }
 
@@ -342,6 +351,14 @@ function drawNode(node) {
     ctx.stroke();
     ctx.fillStyle = 'white';
     ctx.fillText(node.label, node.x - 10, node.y + 5);
+
+    // Display node value if available
+    if (node.value !== null && node.predecessor !== undefined) {
+        ctx.save();
+        ctx.font = '16px Arial';
+        ctx.fillText(`[${node.predecessor}; ${node.value}]`, node.x - 15, node.y - 22);
+        ctx.restore();
+    }
 }
 
 function drawEdge(edge) {
@@ -407,9 +424,56 @@ function drawEdge(edge) {
 }
 
 function clearGraph() {
+    /*
     nodes = [];
     edges = [];
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    */
+   // code for testing the graph
+   var halfHeight = canvas.height/2;
+   nodes.push({ id: "a", x: 100, y: halfHeight, label: 'a', isFuente: true, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "A", x: 300, y: halfHeight - 200, label: 'A', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "B", x: 300, y: halfHeight, label: 'B', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "C", x: 300, y: 200 + halfHeight, label: 'C', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "Z1", x: 450, y: halfHeight - 200, label: 'Z1', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "Z2", x: 550, y: halfHeight, label: 'Z2', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "Z3", x: 450, y: 270 + halfHeight, label: 'Z3', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "Z", x: 700, y: halfHeight, label: 'Z', isFuente: false, isSumidero: true, predecessor: null, value: null});
+
+
+   edges.push({ startNode: nodes[0], endNode: nodes[1], label: '1', starting: nodes[0] });
+   edges.push({ startNode: nodes[0], endNode: nodes[2], label: '1', starting: nodes[0] });
+   edges.push({ startNode: nodes[0], endNode: nodes[3], label: '1', starting: nodes[0] });
+   edges.push({ startNode: nodes[1], endNode: nodes[4], label: '1', starting: nodes[1] });
+   edges.push({ startNode: nodes[1], endNode: nodes[6], label: '1', starting: nodes[1] });
+   edges.push({ startNode: nodes[2], endNode: nodes[4], label: '1', starting: nodes[2] });
+   edges.push({ startNode: nodes[2], endNode: nodes[5], label: '1', starting: nodes[2] });
+   edges.push({ startNode: nodes[3], endNode: nodes[4], label: '1', starting: nodes[3] });
+   edges.push({ startNode: nodes[4], endNode: nodes[7], label: '1', starting: nodes[4] });
+   edges.push({ startNode: nodes[5], endNode: nodes[7], label: '1', starting: nodes[5] });
+   edges.push({ startNode: nodes[6], endNode: nodes[7], label: '1', starting: nodes[6] });
+   
+   edges.push({ startNode: nodes[1] , endNode: nodes[0], label: '1', starting: nodes[0] });
+   edges.push({ startNode: nodes[2] , endNode: nodes[0], label: '1', starting: nodes[0] });
+   edges.push({ startNode: nodes[3] , endNode: nodes[0], label: '1', starting: nodes[0] });
+   edges.push({ startNode: nodes[4] , endNode: nodes[1], label: '1', starting: nodes[1] });
+   edges.push({ startNode: nodes[6] , endNode: nodes[1], label: '1', starting: nodes[1] });
+   edges.push({ startNode: nodes[4] , endNode: nodes[2], label: '1', starting: nodes[2] });
+   edges.push({ startNode: nodes[5] , endNode: nodes[2], label: '1', starting: nodes[2] });
+   edges.push({ startNode: nodes[4] , endNode: nodes[3], label: '1', starting: nodes[3] });
+   edges.push({ startNode: nodes[7] , endNode: nodes[4], label: '1', starting: nodes[4] });
+   edges.push({ startNode: nodes[7] , endNode: nodes[5], label: '1', starting: nodes[5] });
+   edges.push({ startNode: nodes[7] , endNode: nodes[6], label: '1', starting: nodes[6] });
+
+   fuenteNode = nodes[0];
+   sumideroNode = nodes[7];
+   
+   draw();
+}
+
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function iniciarAlgoritmo() {
@@ -432,22 +496,133 @@ function iniciarAlgoritmo() {
     // Hide the buttons
     iniciarAlgoritmoButton.style.display = 'none';
     clearGraphButton.style.display = 'none';
+    algorithmStarted = true;
+    flujo_visualization()
+}
 
-    // Initialize "Flujo" for each edge
+async function flujo_visualization(){
+    // Inicialización de flujos
     edges.forEach(edge => {
         edge.flujo = 0;
     });
-
-    // Log the initialization
-    logsDiv.innerHTML += '<p>Inicializando flujos</p>';
-
-    // Update the edge display to show Capacity/Flujo
+    console.log("Se inicializan los flujos en 0");
     draw();
+    await delay(2000);
+    
+    while(true){
+        // Inicialización de etiquetas
+        nodes.forEach(node => {
+            node.value = null;
+            node.predecessor = null;
+        });
+        console.log("Se eliminan las etiquetas");
+        draw();
+        await delay(2000);
+        let U = [];
 
-    algorithmStarted = true;
+        // Inicialización de la fuente
+        console.log("Se etiqueta la fuente");
+        fuenteNode.value = Infinity;
+        fuenteNode.predecessor = "-";
+        U.push(fuenteNode);
+        console.log("U: ", `{${U.map(node => node.label).join(", ")}}`);
+        draw();
+        await delay(2000);
 
-    // Disable right-click context menu on nodes and edges
-    canvas.removeEventListener('contextmenu', showContextMenu);
+
+        while(sumideroNode.value === null){
+            if(U.length === 0){
+                console.log("No hay más nodos en U");
+                return sumar_flujo_maximo();
+            }
+
+            let u = U.shift();
+            let delta = u.value;
+            console.log(`Se selecciona el nodo ${u.label}`);
+            console.log(`Delta = ${delta}`);
+            console.log("U:", `{${U.map(node => node.label).join(", ")}}`);
+            await delay(2000);
+            console.log(`Se seleccionan conexiones de ${u.label} a otro nodo: `);
+            await delay(1000);
+            for (let i = 0; i < edges.length; i++) {
+                const edge = edges[i];
+                if (edge.startNode === u && edge.starting === u) {
+                    const v = edge.endNode;
+                    const residualCapacity = edge.label - edge.flujo;
+                    console.log(`(${u.label}, ${v.label}): `);
+                    
+                    if(residualCapacity <= 0){
+                        console.log(`La capacidad residual es muy baja: ${residualCapacity}`);
+                        await delay(2000);
+                        continue;
+                    }
+
+                    if(v.value !== null){
+                        console.log(`El nodo ${v.label} ya está etiquetado`);
+                        await delay(2000);
+                        continue;
+                    }
+
+                    v.value = Math.min(u.value, residualCapacity);
+                    v.predecessor = u.label;
+                    U.push(v);
+                    draw();
+                    console.log(`${v.label} no está conectado y la capacidad residual es ${residualCapacity}`);
+                    await delay(2500);
+                }
+            }
+
+            console.log(`Se seleccionan conexiones de algun nodo a ${u.label}: `);
+            await delay(1000);
+            for (let i = 0; i < edges.length; i++) {
+                const edge = edges[i];
+                if (edge.endNode === u && edge.starting !== u) {
+                    const v = edge.startNode;
+                    if (edge.flujo > 0 && v.value === null) {
+                        v.value = Math.min(u.value, edge.flujo);
+                        v.predecessor = u.label;
+                        U.push(v);
+                        draw();
+                        await delay(1000);
+                    }
+                }
+            }
+        }
+        let v = sumideroNode;
+        let path = [v];
+        while(v.predecessor !== "-"){
+            v = nodes.find(node => node.label === v.predecessor);
+            path.push(v);
+        }
+        console.log("Path:", path.map(node => node.label).reverse().join(" -> "));
+        await delay(3000);
+        let delta = sumideroNode.value;
+
+        for (let i = 0; i < path.length - 1; i++) {
+            const u = path[i];
+            const v = path[i + 1];
+            console.log(`(${v.label}, ${u.label}): `);
+            const edge = edges.find(edge => edge.startNode === v && edge.endNode === u && edge.starting === v);
+            if (edge) {
+                edge.flujo += delta;
+                console.log(`Se aumenta el flujo en ${delta}`);
+                
+            } else {
+                const edge = edges.find(edge => edge.startNode === u && edge.endNode === v);
+                edge.flujo -= delta;
+                console.log(`Se disminuye el flujo en ${delta}`);
+            }
+            await delay(2000);
+        }
+    }
 }
 
-
+function sumar_flujo_maximo() {
+    let sum = 0;
+    edges.forEach(edge => {
+        if (edge.endNode === sumideroNode) {
+            sum += edge.flujo;
+        }
+    });
+    console.log("El flujo máximo es:", sum);
+}
