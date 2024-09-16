@@ -49,7 +49,16 @@ iniciarAlgoritmoButton.addEventListener('click', iniciarAlgoritmo);
 function addNode(event) {
     const x = event.offsetX;
     const y = event.offsetY;
-    nodes.push({ id: nodes.length, x, y, label: `Node ${nodes.length}`, isFuente: false, isSumidero: false });
+    nodes.push({ 
+        id: nodes.length, 
+        x, 
+        y, 
+        label: `Node ${nodes.length}`, 
+        isFuente: false, 
+        isSumidero: false, 
+        predecessor: null, 
+        value: null 
+    });
     draw();
 }
 
@@ -342,6 +351,14 @@ function drawNode(node) {
     ctx.stroke();
     ctx.fillStyle = 'white';
     ctx.fillText(node.label, node.x - 10, node.y + 5);
+
+    // Display node value if available
+    if (node.value !== null && node.predecessor !== undefined) {
+        ctx.save();
+        ctx.font = '16px Arial';
+        ctx.fillText(`[${node.predecessor}; ${node.value}]`, node.x - 15, node.y - 22);
+        ctx.restore();
+    }
 }
 
 function drawEdge(edge) {
@@ -407,10 +424,40 @@ function drawEdge(edge) {
 }
 
 function clearGraph() {
+    /*
     nodes = [];
     edges = [];
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    */
+   // code for testing the graph
+   var halfHeight = canvas.height/2;
+   nodes.push({ id: "a", x: 100, y: halfHeight, label: 'a', isFuente: true, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "A", x: 300, y: halfHeight - 200, label: 'A', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "B", x: 300, y: halfHeight, label: 'B', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "C", x: 300, y: 200 + halfHeight, label: 'C', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "Z1", x: 450, y: halfHeight - 200, label: 'Z1', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "Z2", x: 550, y: halfHeight, label: 'Z2', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "Z3", x: 450, y: 270 + halfHeight, label: 'Z3', isFuente: false, isSumidero: false, predecessor: null, value: null});
+   nodes.push({ id: "Z", x: 700, y: halfHeight, label: 'Z', isFuente: false, isSumidero: true, predecessor: null, value: null});
+
+
+   edges.push({ startNode: nodes[0], endNode: nodes[1], label: '1', starting: nodes[0] });
+   edges.push({ startNode: nodes[0], endNode: nodes[2], label: '1', starting: nodes[0] });
+   edges.push({ startNode: nodes[0], endNode: nodes[3], label: '1', starting: nodes[0] });
+   edges.push({ startNode: nodes[1], endNode: nodes[4], label: '1', starting: nodes[1] });
+   edges.push({ startNode: nodes[1], endNode: nodes[6], label: '1', starting: nodes[1] });
+   edges.push({ startNode: nodes[2], endNode: nodes[4], label: '1', starting: nodes[2] });
+   edges.push({ startNode: nodes[2], endNode: nodes[5], label: '1', starting: nodes[2] });
+   edges.push({ startNode: nodes[3], endNode: nodes[4], label: '1', starting: nodes[3] });
+   edges.push({ startNode: nodes[4], endNode: nodes[7], label: '1', starting: nodes[4] });
+   edges.push({ startNode: nodes[5], endNode: nodes[7], label: '1', starting: nodes[5] });
+   edges.push({ startNode: nodes[6], endNode: nodes[7], label: '1', starting: nodes[6] });
+   fuenteNode = nodes[0];
+   sumideroNode = nodes[7];
+   
+   draw();
 }
+
 
 function iniciarAlgoritmo() {
     // Check if there are nodes, fuente, and sumidero
@@ -432,22 +479,41 @@ function iniciarAlgoritmo() {
     // Hide the buttons
     iniciarAlgoritmoButton.style.display = 'none';
     clearGraphButton.style.display = 'none';
+    algorithmStarted = true;
 
-    // Initialize "Flujo" for each edge
+    // Step 1: Initialize all edge flows to 0
+    initializeFlows();
+}
+
+function initializeFlows() {
     edges.forEach(edge => {
         edge.flujo = 0;
     });
-
-    // Log the initialization
-    logsDiv.innerHTML += '<p>Inicializando flujos</p>';
-
-    // Update the edge display to show Capacity/Flujo
+    console.log("Se inicializan los flujos en 0");
     draw();
 
-    algorithmStarted = true;
-
-    // Disable right-click context menu on nodes and edges
-    canvas.removeEventListener('contextmenu', showContextMenu);
+    // Step 2: Clear node labels after the edges have been initialized
+    setTimeout(clearNodeLabels, 1000);
 }
 
+function clearNodeLabels() {
+    nodes.forEach(node => {
+        node.value = null;
+        node.predecessor = null;
+    });
+    console.log("Se eliminan las etiquetas");
+    draw();
+
+    // Step 3: Initialize the fuente node
+    setTimeout(initializeFuente, 1000);
+}
+
+function initializeFuente() {
+    console.log("Se etiqueta la fuente");
+    fuenteNode.value = "∞";
+    fuenteNode.predecessor = "-";
+    draw();
+    
+    // You can add further steps here to continue the algorithm flow...
+}
 
