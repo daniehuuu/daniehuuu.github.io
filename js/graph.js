@@ -25,6 +25,8 @@ let nodeToConnect = null;
 let fuenteNode = null; // Track the current "Fuente" node
 let sumideroNode = null; // Track the current "Sumidero" node
 let algorithmStarted = false;
+let trayectorias = [];
+
 
 canvas.addEventListener('dblclick', addNode);
 canvas.addEventListener('click', selectNode);
@@ -537,7 +539,7 @@ async function flujo_visualization(){
                 fuenteNode.value = null;
                 fuenteNode.predecessor = null;
                 draw(); //in order to delete the last etiqueta
-                return sumar_flujo_maximo();
+                return mostrar_resultado();
             }
 
             let u = U.shift();
@@ -568,7 +570,8 @@ async function flujo_visualization(){
                     }
 
                     v.value = Math.min(u.value, residualCapacity);
-                    v.predecessor = u.label;
+                    v.predecessor = u.label + "\u207A"; // Unicode for superscript plus sign
+                    
                     U.push(v);
                     draw();
                     console.log(`${v.label} no está conectado y la capacidad residual es ${edge.label} - ${edge.flujo} = ${residualCapacity}`);
@@ -598,7 +601,7 @@ async function flujo_visualization(){
                     }
 
                     v.value = Math.min(u.value, edge.flujo);
-                    v.predecessor = u.label;
+                    v.predecessor = u.label + "\u207B"; 
                     U.push(v);
                     draw();
                     console.log(`El flujo es mayor que 0 y ${v.label} no está etiquetado`);
@@ -612,13 +615,16 @@ async function flujo_visualization(){
         }
         let v = sumideroNode;
         let path = [v];
-        while(v.predecessor !== "-"){
-            v = nodes.find(node => node.label === v.predecessor);
+        
+        while(v.predecessor.replace(/\u207A|\u207B/g, '') !== "-"){
+            v = nodes.find(node => node.label === v.predecessor.replace(/\u207A|\u207B/g, ''));
             path.push(v);
         }
-        console.log("Path:", path.map(node => node.label).reverse().join(" -> "));
-        await delay(3000);
+        let tray = path.map(node => node.label).reverse().join(" -> ");
         let delta = sumideroNode.value;
+        console.log("Trayectoria encontrada:", tray);
+        trayectorias.push([tray, delta]);
+        await delay(3000);
 
         for (let i = 0; i < path.length - 1; i++) {
             const u = path[i];
@@ -646,5 +652,14 @@ function sumar_flujo_maximo() {
             sum += edge.flujo;
         }
     });
-    console.log("El flujo máximo es:", sum);
+   return sum;
+}
+
+function mostrar_resultado(){
+    let maxFlow = sumar_flujo_maximo();
+    let result = `El flujo máximo es ${maxFlow} y las trayectorias son:`;
+    trayectorias.forEach(trayectoria => {
+        result += `\n${trayectoria[0]} con un flujo de ${trayectoria[1]}`;
+    });
+    console.log(result);
 }
