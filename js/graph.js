@@ -733,9 +733,109 @@ function sumar_flujo_maximo() {
 
 function mostrar_resultado(){
     let maxFlow = sumar_flujo_maximo();
-    let result = `El flujo máximo es ${maxFlow} y las trayectorias son:`;
+    let result = `El flujo máximo es ${maxFlow} \n\nLas trayectorias son:`;
     trayectorias.forEach(trayectoria => {
         result += `\n${trayectoria[0]} con un flujo de ${trayectoria[1]}`;
     });
+
+
+    const { visitedNodes: minCutStartingNodes, notVisitedNodes: minCutEndingNodes } = getMinCutNodes();
+
+    result += "\n\nEl corte mínimo es: ({";
+    result += minCutStartingNodes.map(node => node.label).join(", ");
+    result += "}; {";
+    result += minCutEndingNodes.map(node => node.label).join(", ");
+    result += "})";
+
+    result += "\nLas aristas del corte mínimo son:\n";
+
+    const minimun_cut = findMinCutEdges(minCutStartingNodes, minCutEndingNodes);
+    minimun_cut.forEach(edge => {
+        result += `(${edge.startNode.label}, ${edge.endNode.label}), `;
+        result += `${edge.starting === edge.startNode ? '+' : '-'}${edge.flujo}\n`;
+    });
+  
+    
     console.log(result);
+}
+
+function getMinCutNodes() {
+    if (!fuenteNode || !sumideroNode) return { visitedNodes: [], notVisitedNodes: [] };
+
+    const visited = new Set();
+    const stack = [fuenteNode];
+
+    while (stack.length > 0) {
+        const currentNode = stack.pop();
+        visited.add(currentNode);
+
+        edges.forEach(edge => {
+            if (edge.startNode === currentNode && edge.starting === currentNode && edge.label - edge.flujo > 0 && !visited.has(edge.endNode)) {
+                stack.push(edge.endNode);
+            }
+        });
+    }
+
+    const visitedNodes = Array.from(visited);
+    const notVisitedNodes = nodes.filter(node => !visited.has(node));
+
+    return { visitedNodes, notVisitedNodes };
+}
+
+function findMinCutEdges(minCutStartingNodes, minCutEndingNodes) {
+    const { visitedNodes, notVisitedNodes } = { visitedNodes: minCutStartingNodes, notVisitedNodes: minCutEndingNodes };
+    const minCutEdges = [];
+
+    visitedNodes.forEach(visitedNode => {
+        notVisitedNodes.forEach(notVisitedNode => {
+            const edge = edges.find(edge => edge.startNode === visitedNode && edge.endNode === notVisitedNode);
+            if (edge) {
+                minCutEdges.push(edge);
+            }
+        });
+    });
+
+    return minCutEdges;
+}
+
+//Not expected. To review
+function drawMinCut() {
+    if (!fuenteNode || !sumideroNode) return;
+
+    const visited = new Set();
+    const stack = [fuenteNode];
+
+    while (stack.length > 0) {
+        const currentNode = stack.pop();
+        visited.add(currentNode);
+
+        edges.forEach(edge => {
+            if (edge.startNode === currentNode && edge.starting === currentNode && edge.label - edge.flujo > 0 && !visited.has(edge.endNode)) {
+                stack.push(edge.endNode);
+            }
+        });
+    }
+
+    // Draw the minimum cut edges
+    edges.forEach(edge => {
+        if (visited.has(edge.startNode) && !visited.has(edge.endNode)) {
+            const { startNode, endNode } = edge;
+            console.log(`(${startNode.label}, ${endNode.label})\n`);
+            /*
+            const angle = Math.atan2(endNode.y - startNode.y, endNode.x - startNode.x);
+            const startX = startNode.x + 20 * Math.cos(angle);
+            const startY = startNode.y + 20 * Math.sin(angle);
+            const endX = endNode.x - 20 * Math.cos(angle);
+            const endY = endNode.y - 20 * Math.sin(angle);
+
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            */
+        }
+    });
 }
