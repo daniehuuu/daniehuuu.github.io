@@ -112,6 +112,7 @@ function isPositiveInteger(value) {
 }
 
 function connectNodes() {
+    //nodeToConnect -> selectedNode
     if (nodeToConnect) {
         if (nodeToConnect === selectedNode) {
             // Cancel the connection
@@ -126,6 +127,18 @@ function connectNodes() {
             nodeToConnect = null;
             connectNodeOption.textContent = 'Connect Node';
             contextMenu.style.display = 'none'; // Hide the context menu
+            draw();
+            return;
+        }
+        if(selectedNode.isFuente){
+            alert('La fuente no puede ser un nodo de entrada');
+            nodeToConnect = null;
+            draw();
+            return;
+        }
+        if(nodeToConnect.isSumidero){
+            alert('El sumidero no puede ser un nodo de salida');
+            nodeToConnect = null;
             draw();
             return;
         }
@@ -159,8 +172,20 @@ function connectNodes() {
 
 function deleteNode() {
     if (!selectedNode) return;
+
+    if(selectedNode.isFuente){
+        fuenteNode = null;
+    }
+
+    if(selectedNode.isSumidero){
+        sumideroNode = null;
+    }
+
     nodes = nodes.filter(node => node !== selectedNode);
     edges = edges.filter(edge => edge.startNode !== selectedNode && edge.endNode !== selectedNode);
+    
+    nodeToConnect = null;
+
     draw();
     contextMenu.style.display = 'none';
 }
@@ -287,7 +312,12 @@ function showContextMenu(event) {
     }
 }
 
-
+function nodeConnectsAnother(node) {
+    return edges.some(edge => edge.startNode === node && edge.starting === node);
+}
+function someNodeConnectsNode(node) {
+    return edges.some(edge => edge.endNode === node && edge.starting !== node);
+}
 function toggleFuenteNode() {
     if (selectedNode) {
         if (selectedNode.isFuente) {
@@ -300,6 +330,10 @@ function toggleFuenteNode() {
             if (selectedNode.isSumidero) {
                 selectedNode.isSumidero = false;
                 sumideroNode = null;
+            }
+            if(someNodeConnectsNode(selectedNode)){
+                alert('La fuente no puede tener conexiones de entrada');
+                return;
             }
             selectedNode.isFuente = true;
             fuenteNode = selectedNode;
@@ -321,6 +355,10 @@ function toggleSumideroNode() {
             if (selectedNode.isFuente) {
                 selectedNode.isFuente = false;
                 fuenteNode = null;
+            }
+            if(nodeConnectsAnother(selectedNode)){
+                alert('El sumidero no puede tener conexiones de salida');
+                return;
             }
             selectedNode.isSumidero = true;
             sumideroNode = selectedNode;
@@ -478,6 +516,28 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function hasPathFromFuenteToSumidero() {
+    if (!fuenteNode || !sumideroNode) return false;
+
+    const visited = new Set();
+    const stack = [fuenteNode];
+
+    while (stack.length > 0) {
+        const currentNode = stack.pop();
+        if (currentNode === sumideroNode) return true;
+
+        visited.add(currentNode);
+
+        edges.forEach(edge => {
+            if (edge.startNode === currentNode && edge.starting === currentNode && !visited.has(edge.endNode)) {
+                stack.push(edge.endNode);
+            }
+        });
+    }
+
+    return false;
+}
+
 function iniciarAlgoritmo() {
     // Check if there are nodes, fuente, and sumidero
     if (nodes.length === 0) {
@@ -495,6 +555,10 @@ function iniciarAlgoritmo() {
         return;
     }
 
+    if(hasPathFromFuenteToSumidero() === false){
+        alert('No hay una trayectoria de la fuente al sumidero');
+        return;
+    }
     // Hide the buttons
     iniciarAlgoritmoButton.style.display = 'none';
     clearGraphButton.style.display = 'none';
