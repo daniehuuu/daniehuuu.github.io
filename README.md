@@ -5,3 +5,5 @@ Proyecto (TB1) de Matemática Computacional (MA475) de la UPC.
  - [ ] Console.log must be in HTML.
  - [ ] Repetitives structures must be print also.
  - [ ] Drawing the minimun cut.
+ - [ ] Handle the graph as a data structure 
+ - [ ] Follow the colorset procedure of the "bosquejo"
