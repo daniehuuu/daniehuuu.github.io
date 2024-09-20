@@ -5,6 +5,7 @@ const changeLabelOption = document.getElementById('changeLabel');
 const connectNodeOption = document.getElementById('connectNode');
 const deleteNodeOption = document.getElementById('deleteNode');
 const clearGraphButton = document.getElementById('clearGraphButton');
+const grafoDemoButton = document.getElementById('demoButton');
 const setFuenteOption = document.getElementById('setFuente'); // Option for Fuente
 const setSumideroOption = document.getElementById('setSumidero'); // Option for Sumidero
 const logsDiv = document.getElementById('logs');
@@ -45,8 +46,9 @@ setSumideroOption.addEventListener('click', toggleSumideroNode); // New event li
 editEdgeLabelOption.addEventListener('click', editEdgeLabel);
 deleteEdgeOption.addEventListener('click', deleteEdge);
 
-clearGraphButton.addEventListener('click', clearGraph);
 iniciarAlgoritmoButton.addEventListener('click', iniciarAlgoritmo);
+grafoDemoButton.addEventListener('click', grafoDemo);
+clearGraphButton.addEventListener('click', clearGraph);
 
 function addNode(event) {
     const x = event.offsetX;
@@ -225,8 +227,12 @@ function deleteEdge() {
 }
 
 canvas.addEventListener('click', () => {
-    contextMenuNode.style.display = 'none';
-    contextMenuEdge.style.display = 'none';
+    if (contextMenuNode) {
+        contextMenuNode.style.display = 'none';
+    }
+    if (contextMenuEdge) {
+        contextMenuEdge.style.display = 'none';
+    }
 });
 
 canvas.addEventListener('contextmenu', function (event) {
@@ -238,8 +244,12 @@ canvas.addEventListener('contextmenu', function (event) {
     } else if (getNodeAt(x, y)) {
         showContextMenu(event);
     } else {
-        contextMenuNode.style.display = 'none';
-        contextMenuEdge.style.display = 'none';
+        if (contextMenuNode) {
+            contextMenuNode.style.display = 'none';
+        }
+        if (contextMenuEdge) {
+            contextMenuEdge.style.display = 'none';
+        }
     }
 });
 
@@ -463,52 +473,52 @@ function drawEdge(edge) {
     }
 }
 
+function grafoDemo(){
+    var halfHeight = canvas.height/2;
+    nodes.push({ id: "a", x: 100, y: halfHeight, label: 'a', isFuente: true, isSumidero: false, predecessor: null, value: null});
+    nodes.push({ id: "A", x: 300, y: halfHeight - 200, label: 'A', isFuente: false, isSumidero: false, predecessor: null, value: null});
+    nodes.push({ id: "B", x: 300, y: halfHeight, label: 'B', isFuente: false, isSumidero: false, predecessor: null, value: null});
+    nodes.push({ id: "C", x: 300, y: 200 + halfHeight, label: 'C', isFuente: false, isSumidero: false, predecessor: null, value: null});
+    nodes.push({ id: "Z1", x: 450, y: halfHeight - 200, label: 'Z1', isFuente: false, isSumidero: false, predecessor: null, value: null});
+    nodes.push({ id: "Z2", x: 550, y: halfHeight, label: 'Z2', isFuente: false, isSumidero: false, predecessor: null, value: null});
+    nodes.push({ id: "Z3", x: 450, y: 270 + halfHeight, label: 'Z3', isFuente: false, isSumidero: false, predecessor: null, value: null});
+    nodes.push({ id: "Z", x: 700, y: halfHeight, label: 'Z', isFuente: false, isSumidero: true, predecessor: null, value: null});
+ 
+ 
+    edges.push({ startNode: nodes[0], endNode: nodes[1], label: '1', starting: nodes[0] });
+    edges.push({ startNode: nodes[0], endNode: nodes[2], label: '1', starting: nodes[0] });
+    edges.push({ startNode: nodes[0], endNode: nodes[3], label: '1', starting: nodes[0] });
+    edges.push({ startNode: nodes[1], endNode: nodes[4], label: '1', starting: nodes[1] });
+    edges.push({ startNode: nodes[1], endNode: nodes[6], label: '1', starting: nodes[1] });
+    edges.push({ startNode: nodes[2], endNode: nodes[4], label: '1', starting: nodes[2] });
+    edges.push({ startNode: nodes[2], endNode: nodes[5], label: '1', starting: nodes[2] });
+    edges.push({ startNode: nodes[3], endNode: nodes[4], label: '1', starting: nodes[3] });
+    edges.push({ startNode: nodes[4], endNode: nodes[7], label: '1', starting: nodes[4] });
+    edges.push({ startNode: nodes[5], endNode: nodes[7], label: '1', starting: nodes[5] });
+    edges.push({ startNode: nodes[6], endNode: nodes[7], label: '1', starting: nodes[6] });
+    
+    edges.push({ startNode: nodes[1] , endNode: nodes[0], label: '1', starting: nodes[0] });
+    edges.push({ startNode: nodes[2] , endNode: nodes[0], label: '1', starting: nodes[0] });
+    edges.push({ startNode: nodes[3] , endNode: nodes[0], label: '1', starting: nodes[0] });
+    edges.push({ startNode: nodes[4] , endNode: nodes[1], label: '1', starting: nodes[1] });
+    edges.push({ startNode: nodes[6] , endNode: nodes[1], label: '1', starting: nodes[1] });
+    edges.push({ startNode: nodes[4] , endNode: nodes[2], label: '1', starting: nodes[2] });
+    edges.push({ startNode: nodes[5] , endNode: nodes[2], label: '1', starting: nodes[2] });
+    edges.push({ startNode: nodes[4] , endNode: nodes[3], label: '1', starting: nodes[3] });
+    edges.push({ startNode: nodes[7] , endNode: nodes[4], label: '1', starting: nodes[4] });
+    edges.push({ startNode: nodes[7] , endNode: nodes[5], label: '1', starting: nodes[5] });
+    edges.push({ startNode: nodes[7] , endNode: nodes[6], label: '1', starting: nodes[6] });
+ 
+    fuenteNode = nodes[0];
+    sumideroNode = nodes[7];
+    
+    draw();
+}
+
 function clearGraph() {
-    /*
     nodes = [];
     edges = [];
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    */
-   // code for testing the graph
-   var halfHeight = canvas.height/2;
-   nodes.push({ id: "a", x: 100, y: halfHeight, label: 'a', isFuente: true, isSumidero: false, predecessor: null, value: null});
-   nodes.push({ id: "A", x: 300, y: halfHeight - 200, label: 'A', isFuente: false, isSumidero: false, predecessor: null, value: null});
-   nodes.push({ id: "B", x: 300, y: halfHeight, label: 'B', isFuente: false, isSumidero: false, predecessor: null, value: null});
-   nodes.push({ id: "C", x: 300, y: 200 + halfHeight, label: 'C', isFuente: false, isSumidero: false, predecessor: null, value: null});
-   nodes.push({ id: "Z1", x: 450, y: halfHeight - 200, label: 'Z1', isFuente: false, isSumidero: false, predecessor: null, value: null});
-   nodes.push({ id: "Z2", x: 550, y: halfHeight, label: 'Z2', isFuente: false, isSumidero: false, predecessor: null, value: null});
-   nodes.push({ id: "Z3", x: 450, y: 270 + halfHeight, label: 'Z3', isFuente: false, isSumidero: false, predecessor: null, value: null});
-   nodes.push({ id: "Z", x: 700, y: halfHeight, label: 'Z', isFuente: false, isSumidero: true, predecessor: null, value: null});
-
-
-   edges.push({ startNode: nodes[0], endNode: nodes[1], label: '1', starting: nodes[0] });
-   edges.push({ startNode: nodes[0], endNode: nodes[2], label: '1', starting: nodes[0] });
-   edges.push({ startNode: nodes[0], endNode: nodes[3], label: '1', starting: nodes[0] });
-   edges.push({ startNode: nodes[1], endNode: nodes[4], label: '1', starting: nodes[1] });
-   edges.push({ startNode: nodes[1], endNode: nodes[6], label: '1', starting: nodes[1] });
-   edges.push({ startNode: nodes[2], endNode: nodes[4], label: '1', starting: nodes[2] });
-   edges.push({ startNode: nodes[2], endNode: nodes[5], label: '1', starting: nodes[2] });
-   edges.push({ startNode: nodes[3], endNode: nodes[4], label: '1', starting: nodes[3] });
-   edges.push({ startNode: nodes[4], endNode: nodes[7], label: '1', starting: nodes[4] });
-   edges.push({ startNode: nodes[5], endNode: nodes[7], label: '1', starting: nodes[5] });
-   edges.push({ startNode: nodes[6], endNode: nodes[7], label: '1', starting: nodes[6] });
-   
-   edges.push({ startNode: nodes[1] , endNode: nodes[0], label: '1', starting: nodes[0] });
-   edges.push({ startNode: nodes[2] , endNode: nodes[0], label: '1', starting: nodes[0] });
-   edges.push({ startNode: nodes[3] , endNode: nodes[0], label: '1', starting: nodes[0] });
-   edges.push({ startNode: nodes[4] , endNode: nodes[1], label: '1', starting: nodes[1] });
-   edges.push({ startNode: nodes[6] , endNode: nodes[1], label: '1', starting: nodes[1] });
-   edges.push({ startNode: nodes[4] , endNode: nodes[2], label: '1', starting: nodes[2] });
-   edges.push({ startNode: nodes[5] , endNode: nodes[2], label: '1', starting: nodes[2] });
-   edges.push({ startNode: nodes[4] , endNode: nodes[3], label: '1', starting: nodes[3] });
-   edges.push({ startNode: nodes[7] , endNode: nodes[4], label: '1', starting: nodes[4] });
-   edges.push({ startNode: nodes[7] , endNode: nodes[5], label: '1', starting: nodes[5] });
-   edges.push({ startNode: nodes[7] , endNode: nodes[6], label: '1', starting: nodes[6] });
-
-   fuenteNode = nodes[0];
-   sumideroNode = nodes[7];
-   
-   draw();
 }
 
 
@@ -562,6 +572,8 @@ function iniciarAlgoritmo() {
     // Hide the buttons
     iniciarAlgoritmoButton.style.display = 'none';
     clearGraphButton.style.display = 'none';
+    grafoDemoButton.style.display = 'none';
+
     algorithmStarted = true;
     flujo_visualization()
 }
