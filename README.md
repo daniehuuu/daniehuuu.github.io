@@ -6,3 +6,4 @@ Proyecto (TB1) de Matemática Computacional (MA475) de la UPC.
  - [ ] Drawing the minimun cut.
  - [ ] Handle the graph as a data structure 
  - [ ] Follow the colorset procedure of the "bosquejo"
+ - [ ] Add a button for a direct maximun flow calculation.
