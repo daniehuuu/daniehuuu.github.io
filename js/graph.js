@@ -149,6 +149,7 @@ function connectNodes() {
             return;
         }
         let edgeLabel;
+        let infOp = ["inf", "infty", "infinity"];
         do {
             edgeLabel = prompt('Enter edge label (positive integer):', '');
             if (edgeLabel === null) {
@@ -158,10 +159,14 @@ function connectNodes() {
                 draw();
                 return;
             }
-        } while (!isPositiveInteger(edgeLabel));
+        } while (!isPositiveInteger(edgeLabel) && !infOp.includes(edgeLabel));
 
+        if(infOp.includes(edgeLabel)){
+            edgeLabel = Infinity;
+        }
         // Store both directions internally
         edges.push({ startNode: nodeToConnect, endNode: selectedNode, label: edgeLabel, starting: nodeToConnect });
+
         edges.push({ startNode: selectedNode, endNode: nodeToConnect, label: edgeLabel, starting: nodeToConnect });
 
         nodeToConnect = null;
@@ -210,6 +215,7 @@ function getEdgeAt(x, y) {
 
 function editEdgeLabel() {
     let newLabel;
+    let infOp = ["inf", "infty", "infinity"];
     do {
         newLabel = prompt('Enter new edge label (positive integer):', selectedEdge.label);
         if (newLabel === null) {
@@ -217,12 +223,19 @@ function editEdgeLabel() {
             contextMenuEdge.style.display = 'none';
             return;
         }
-    } while (!isPositiveInteger(newLabel));
+    } while (!isPositiveInteger(newLabel) && !infOp.includes(newLabel));
+
+    if(infOp.includes(newLabel)){
+        newLabel = Infinity;
+    }
 
     selectedEdge.label = newLabel;
+
     draw();
     contextMenuEdge.style.display = 'none';
+
 }
+
 
 function deleteEdge() {
     edges = edges.filter(edge => edge !== selectedEdge);
@@ -410,7 +423,11 @@ function drawNode(node) {
     if (node.value !== null && node.predecessor !== undefined) {
         ctx.save();
         ctx.font = '16px Arial';
-        ctx.fillText(`[${node.predecessor}; ${node.value}]`, node.x - 15, node.y - 22);
+        if(node.value === Infinity){
+            ctx.fillText(`[${node.predecessor}; ∞]`, node.x - 15, node.y - 22);
+        }else{
+            ctx.fillText(`[${node.predecessor}; ${node.value}]`, node.x - 15, node.y - 22);
+        }
         ctx.restore();
     }
 }
@@ -456,21 +473,33 @@ function drawEdge(edge) {
 
             // Save the current context state
             ctx.save();
+            //console log infinity symbol
+            console.log("∞");
 
             // Set font size and outline for the label
+
             ctx.font = '16px Arial'; // Increase font size
             ctx.lineWidth = 3; // Set outline width
             ctx.strokeStyle = 'black'; // Set outline color
             ctx.fillStyle = 'white'; // Set fill color
 
             if (typeof flujo !== 'undefined') {
-                ctx.strokeText(`${label}/${flujo}`, midX, midY);
-                ctx.fillText(`${label}/${flujo}`, midX, midY);
+                if(label === Infinity){
+                    ctx.strokeText(`∞/${flujo}`, midX, midY);
+                    ctx.fillText(`∞/${flujo}`, midX, midY);
+                }else{
+                    ctx.strokeText(`${label}/${flujo}`, midX, midY);
+                    ctx.fillText(`${label}/${flujo}`, midX, midY);
+                }
             } else {
-                ctx.strokeText(label, midX, midY);
-                ctx.fillText(label, midX, midY);
+                if(label === Infinity){
+                    ctx.strokeText(`∞`, midX, midY);
+                    ctx.fillText(`∞`, midX, midY);
+                }else{
+                    ctx.strokeText(label, midX, midY);
+                    ctx.fillText(label, midX, midY);
+                }
             }
-
             // Restore the context state to avoid affecting other drawings
             ctx.restore();
         }
@@ -643,6 +672,10 @@ function subscript(number) {
     return number.toString().split('').map(digit => subscriptDigits[parseInt(digit)]).join('');
 }
 
+function infLabel(label){
+    return (label === Infinity) ? "∞" : label;
+}
+
 async function flujo_visualization(){
     // Inicialización de flujos
     edges.forEach(edge => {
@@ -731,8 +764,8 @@ async function flujo_visualization(){
                     
                     U.push(v);
                     draw();
-                    console.log(`${v.label} no está conectado y la capacidad residual es ${edge.label} - ${edge.flujo} = ${residualCapacity}`);
-                    console.log(`Predecesor = ${u.label}. min(${u.value}, ${residualCapacity}) = ${v.value}`);
+                    console.log(`${v.label} no está conectado y la capacidad residual es ${infLabel(edge.label)} - ${edge.flujo} = ${residualCapacity}`);
+                    console.log(`Predecesor = ${u.label}. min(${infLabel(u.value)}, ${residualCapacity}) = ${v.value}`);
                     await delay(3500);
                 }
             }
@@ -843,11 +876,8 @@ function getMinCutNodes() {
     while (stack.length > 0) {
         const currentNode = stack.pop();
         visited.add(currentNode);
-        console.log("Visited:", currentNode.label);
         edges.forEach(edge => {
             if (edge.startNode === currentNode && edge.label - edge.flujo > 0 && !visited.has(edge.endNode)) {
-                console.log(edge.startNode.label, "-", edge.endNode.label, "-", edge.label, "-", edge.flujo);
-                console.log("PUSH", edge.endNode.label);
                 stack.push(edge.endNode);
             }
 

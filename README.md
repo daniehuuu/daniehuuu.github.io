@@ -7,3 +7,5 @@ Proyecto (TB1) de Matemática Computacional (MA475) de la UPC.
  - [ ] Handle the graph as a data structure 
  - [ ] Follow the colorset procedure of the "bosquejo"
  - [ ] Add a button for a direct maximun flow calculation.
+ - [ ] Infinity capacity feature.
+ - [ ] User manual input integrity.
