@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrucciones del Algoritmo</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #4a90e2;
+        }
+
+        p, ul {
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        ul li::before {
+            content: '•';
+            color: #4a90e2;
+            display: inline-block; 
+            width: 1em;
+            margin-left: -1em;
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            background-color: #357ABD;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:focus {
+            outline: none;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Instrucciones para el Algoritmo de Flujo Máximo</h1>
+
+    <h2>Pasos para interactuar con el grafo:</h2>
+    <ul>
+        <li>Haz doble clic en el lienzo para agregar un nodo.</li>
+        <li>Haz clic derecho en un nodo para ver opciones como "Cambiar etiqueta", "Conectar nodo" o "Eliminar nodo".</li>
+        <li>Haz clic derecho en una arista para editar su etiqueta o eliminarla.</li>
+        <li>Usa los botones para cargar diferentes demos de grafos o limpiar el grafo.</li>
+        <li>Selecciona un nodo como <em>fuente</em> o <em>sumidero</em> desde el menú contextual.</li>
+    </ul>
+
+    <h2>Botones de acción:</h2>
+    <p>Utiliza los botones disponibles para ejecutar las siguientes acciones:</p>
+    <ul>
+        <li><strong>Iniciar Algoritmo:</strong> Ejecuta el algoritmo de flujo máximo una vez que hayas definido los nodos fuente y sumidero.</li>
+        <li><strong>Limpiar Grafo:</strong> Borra todos los nodos y aristas del lienzo.</li>
+        <li><strong>Demos:</strong> Carga diferentes ejemplos de grafos predefinidos para pruebas rápidas.</li>
+    </ul>
+
+</body>
+</html>

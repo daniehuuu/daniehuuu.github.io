@@ -840,8 +840,8 @@ async function flujo_visualization(){
                 inverseEdge.flujo += delta;
                 console.log(`Se aumenta el flujo en ${delta}`);
             } else {
-                const edge = edges.find(edge => edge.startNode === u && edge.endNode === v && edge.starting === v);
-                const inverseEdge = edges.find(edge => edge.startNode === v && edge.endNode === u && edge.starting === v);
+                const edge = edges.find(edge => edge.startNode === u && edge.endNode === v && edge.starting === u);
+                const inverseEdge = edges.find(edge => edge.startNode === v && edge.endNode === u && edge.starting === u);
                 edge.flujo -= delta;
                 inverseEdge.flujo -= delta;
                 console.log(`Se disminuye el flujo en ${delta}`);
@@ -909,6 +909,14 @@ function drawMinCut(minCutEdges) {
         return;
     }
 
+
+    // Reset predecessor and value for all nodes
+    nodes.forEach(node => {
+        node.predecessor = null;
+        node.value = null;
+    });
+    draw();
+    
     minCutEdges.forEach(edge => {
         const { startNode, endNode } = edge;
         const angle = Math.atan2(endNode.y - startNode.y, endNode.x - startNode.x);
