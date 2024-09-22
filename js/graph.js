@@ -473,9 +473,6 @@ function drawEdge(edge) {
 
             // Save the current context state
             ctx.save();
-            //console log infinity symbol
-            console.log("∞");
-
             // Set font size and outline for the label
 
             ctx.font = '16px Arial'; // Increase font size
@@ -764,8 +761,8 @@ async function flujo_visualization(){
                     
                     U.push(v);
                     draw();
-                    console.log(`${v.label} no está conectado y la capacidad residual es ${infLabel(edge.label)} - ${edge.flujo} = ${residualCapacity}`);
-                    console.log(`Predecesor = ${u.label}. min(${infLabel(u.value)}, ${residualCapacity}) = ${v.value}`);
+                    console.log(`${v.label} no está conectado y la capacidad residual es ${edge.label==Infinity?"∞":edge.label} - ${edge.flujo} = ${residualCapacity}`);
+                    console.log(`Predecesor = ${u.label}. min(${u.value}, ${residualCapacity}) = ${v.value}`);
                     await delay(3500);
                 }
             }
@@ -882,7 +879,7 @@ function getMinCutNodes() {
             }
 
         });
-    }
+    }   
 
     const visitedNodes = Array.from(visited);
     const notVisitedNodes = nodes.filter(node => !visited.has(node));
