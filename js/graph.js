@@ -29,6 +29,7 @@ let fuenteNode = null; // Track the current "Fuente" node
 let sumideroNode = null; // Track the current "Sumidero" node
 let algorithmStarted = false;
 let trayectorias = [];
+let noDelay = false;
 
 
 canvas.addEventListener('dblclick', addNode);
@@ -607,9 +608,11 @@ function clearGraph() {
 
 
 function delay(ms) {
+    if (noDelay) return;
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/* we will allow trivial graphs
 function hasPathFromFuenteToSumidero() {
     if (!fuenteNode || !sumideroNode) return false;
 
@@ -631,6 +634,7 @@ function hasPathFromFuenteToSumidero() {
 
     return false;
 }
+*/
 
 function iniciarAlgoritmo() {
     // Check if there are nodes, fuente, and sumidero
@@ -649,10 +653,12 @@ function iniciarAlgoritmo() {
         return;
     }
 
+    /*
     if(hasPathFromFuenteToSumidero() === false){
         alert('No hay una trayectoria de la fuente al sumidero');
         return;
     }
+    */
     // Hide the buttons
     iniciarAlgoritmoButton.style.display = 'none';
     clearGraphButton.style.display = 'none';
@@ -672,6 +678,13 @@ function subscript(number) {
 function infLabel(label){
     return (label === Infinity) ? "∞" : label;
 }
+
+async function flujo_respuesta_directa(){
+    noDelay = true;
+    await flujo_visualization();
+    noDelay = false;
+}
+
 
 async function flujo_visualization(){
     // Inicialización de flujos
@@ -714,13 +727,8 @@ async function flujo_visualization(){
             console.log(`W1${subscript(whileCount)}-W1${subscript(nestedWhileCount)}:\n`);
             if(U.length === 0){
                 console.log("No hay más nodos en U");
-                //delete the etiqueta of fuente
-                await delay(2000);
-                fuenteNode.value = null;
-                fuenteNode.predecessor = null;
                 await delay(2000);
                 console.clear();
-                draw();
                 mostrar_resultado();
                 return;
             }
@@ -728,7 +736,7 @@ async function flujo_visualization(){
             let u = U.shift();
             let delta = u.value;
             console.log(`Se selecciona el nodo ${u.label}`);
-            console.log(`Delta = ${delta}`);
+            console.log(`Delta = ${infLabel(delta)}`);
             console.log("U:", `{${U.map(node => node.label).join(", ")}}`);
             await delay(3000);
             console.log(`Se seleccionan conexiones de ${u.label} a otro nodo: `);
@@ -761,8 +769,8 @@ async function flujo_visualization(){
                     
                     U.push(v);
                     draw();
-                    console.log(`${v.label} no está conectado y la capacidad residual es ${edge.label==Infinity?"∞":edge.label} - ${edge.flujo} = ${residualCapacity}`);
-                    console.log(`Predecesor = ${u.label}. min(${u.value}, ${residualCapacity}) = ${v.value}`);
+                    console.log(`${v.label} no está conectado y la capacidad residual es ${infLabel(edge.label)} - ${edge.flujo} = ${infLabel(residualCapacity)}`);
+                    console.log(`Predecesor = ${u.label}. min(${infLabel(u.value)}, ${infLabel(residualCapacity)}) = ${infLabel(v.value)}`);
                     await delay(3500);
                 }
             }
@@ -868,23 +876,10 @@ function sumar_flujo_maximo() {
 function getMinCutNodes() {
     if (!fuenteNode || !sumideroNode) return { visitedNodes: [], notVisitedNodes: [] };
 
-    const visited = new Set();
-    const stack = [fuenteNode];
-    while (stack.length > 0) {
-        const currentNode = stack.pop();
-        visited.add(currentNode);
-        edges.forEach(edge => {
-            if (edge.startNode === currentNode && edge.label - edge.flujo > 0 && !visited.has(edge.endNode)) {
-                stack.push(edge.endNode);
-            }
+    const labelledNodes = nodes.filter(node => node.value !== null || node.predecessor !== null);
+    const notLabelledNodes = nodes.filter(node => node.value === null && node.predecessor === null);
 
-        });
-    }   
-
-    const visitedNodes = Array.from(visited);
-    const notVisitedNodes = nodes.filter(node => !visited.has(node));
-
-    return { visitedNodes, notVisitedNodes };
+    return { labelledNodes, notLabelledNodes };
 }
 
 function findMinCutEdges(minCutStartingNodes, minCutEndingNodes) {
@@ -909,25 +904,23 @@ function drawMinCut(minCutEdges) {
         return;
     }
 
-
-    // Reset predecessor and value for all nodes
-    nodes.forEach(node => {
-        node.predecessor = null;
-        node.value = null;
-    });
-    draw();
-    
     minCutEdges.forEach(edge => {
-        const { startNode, endNode } = edge;
-        const angle = Math.atan2(endNode.y - startNode.y, endNode.x - startNode.x);
-        const startX = startNode.x + 20 * Math.cos(angle);
-        const startY = startNode.y + 20 * Math.sin(angle);
-        const endX = endNode.x - 20 * Math.cos(angle);
-        const endY = endNode.y - 20 * Math.sin(angle);
+        var { startNode, endNode } = edge;
 
-        // Set style for min-cut edges
-        ctx.strokeStyle = edge.starting === edge.startNode ? 'green' : 'blue';
+        ctx.strokeStyle = 'green';
         ctx.lineWidth = 3;
+
+        if(edge.starting != edge.startNode){
+            var tmp = startNode;
+            startNode = endNode;
+            endNode = tmp;
+            ctx.strokeStyle = 'blue';
+        }
+        const angle = Math.atan2(endNode.y - startNode.y, endNode.x - startNode.x);
+        var startX = startNode.x + 20 * Math.cos(angle);
+        var startY = startNode.y + 20 * Math.sin(angle);
+        var endX = endNode.x - 20 * Math.cos(angle);
+        var endY = endNode.y - 20 * Math.sin(angle);
 
         // Draw the edge line
         ctx.beginPath();
@@ -979,13 +972,14 @@ function drawMinCut(minCutEdges) {
 
 function mostrar_resultado(){
     let maxFlow = sumar_flujo_maximo();
-    let result = `El flujo máximo es ${maxFlow} \n\nLas trayectorias usadas son:`;
+    let result = `El flujo máximo es ${maxFlow} 
+                \nLas trayectorias usadas son:`;
+
     trayectorias.forEach(trayectoria => {
         result += `\n${trayectoria[0]} con un flujo de ${trayectoria[1]}`;
     });
 
-
-    const { visitedNodes: minCutStartingNodes, notVisitedNodes: minCutEndingNodes } = getMinCutNodes();
+    const { labelledNodes: minCutStartingNodes, notLabelledNodes: minCutEndingNodes } = getMinCutNodes();
 
     result += "\n\nEl corte mínimo es: ({";
     result += minCutStartingNodes.map(node => node.label).join(", ");
@@ -996,10 +990,27 @@ function mostrar_resultado(){
     result += "\nLas aristas del corte mínimo son:\n";
 
     const minimun_cut = findMinCutEdges(minCutStartingNodes, minCutEndingNodes);
+
+    var flujo_max_minimun_cut = [];
     minimun_cut.forEach(edge => {
-        result += `(${edge.startNode.label}, ${edge.endNode.label}), `;
-        result += `${edge.starting === edge.startNode ? '+' : '-'}${edge.flujo}\n`;
+        if(edge.starting === edge.startNode){
+            result += `(${edge.startNode.label}, ${edge.endNode.label}), `;
+            result += `|f| += ${edge.flujo}\n`;
+            flujo_max_minimun_cut.push(edge.flujo);
+        }else{
+            result += `(${edge.endNode.label}, ${edge.startNode.label}), `;
+            result += `flujo = ${edge.flujo}\n`;
+        }
     });
+
+    result += "|f| del corte mínimo = ";
+    var sum_minimun_cut = flujo_max_minimun_cut.reduce((a, b) => a + b, 0);
+
+    if (flujo_max_minimun_cut.length <= 1){
+        result += sum_minimun_cut;
+    }else{
+        result += flujo_max_minimun_cut.join(" + ") + " = " + sum_minimun_cut;
+    }
   
     drawMinCut(minimun_cut);
 
