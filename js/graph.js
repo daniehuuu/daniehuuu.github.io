@@ -113,9 +113,9 @@ function changeLabel() {
     contextMenu.style.display = 'none';
 }
 
-function isPositiveInteger(value) {
+function isPositiveNumber(value) {
     const number = Number(value);
-    return Number.isInteger(number) && number > 0;
+    return !isNaN(number) && number > 0;
 }
 
 function connectNodes() {
@@ -150,9 +150,9 @@ function connectNodes() {
             return;
         }
         let edgeLabel;
-        let infOp = ["inf", "infty", "infinity"];
+        let infOp = ["inf", "infty", "infinity", "infinito"];
         do {
-            edgeLabel = prompt('Enter edge label (positive integer):', '');
+            edgeLabel = prompt('Ingresa un número positivo:', '');
             if (edgeLabel === null) {
                 nodeToConnect = null;
                 connectNodeOption.textContent = 'Connect Node';
@@ -160,7 +160,7 @@ function connectNodes() {
                 draw();
                 return;
             }
-        } while (!isPositiveInteger(edgeLabel) && !infOp.includes(edgeLabel));
+        } while (!isPositiveNumber(edgeLabel) && !infOp.includes(edgeLabel));
 
         if(infOp.includes(edgeLabel)){
             edgeLabel = Infinity;
@@ -224,7 +224,7 @@ function editEdgeLabel() {
             contextMenuEdge.style.display = 'none';
             return;
         }
-    } while (!isPositiveInteger(newLabel) && !infOp.includes(newLabel));
+    } while (!isPositiveNumber(newLabel) && !infOp.includes(newLabel));
 
     if(infOp.includes(newLabel)){
         newLabel = Infinity;
