@@ -11,7 +11,7 @@ const yetAnotherDemoButton = document.getElementById('yetAnotherDemoButton');
 const setFuenteOption = document.getElementById('setFuente'); // Option for Fuente
 const setSumideroOption = document.getElementById('setSumidero'); // Option for Sumidero
 const logsDiv = document.getElementById('logs');
-const iniciarAlgoritmoButton = document.getElementById('iniciarAlgoritmo');
+//const iniciarAlgoritmoButton = document.getElementById('iniciarAlgoritmo');
 
 //edges
 const contextMenuNode = document.getElementById('contextMenuNode');
@@ -49,7 +49,7 @@ setSumideroOption.addEventListener('click', toggleSumideroNode); // New event li
 editEdgeLabelOption.addEventListener('click', editEdgeLabel);
 deleteEdgeOption.addEventListener('click', deleteEdge);
 
-iniciarAlgoritmoButton.addEventListener('click', iniciarAlgoritmo);
+//iniciarAlgoritmoButton.addEventListener('click', iniciarAlgoritmo);
 grafoDemoButton.addEventListener('click', grafoDemo);
 simpleDemoButton.addEventListener('click', simpleDemo);
 yetAnotherDemoButton.addEventListener('click', yetAnotherDemo);
@@ -636,40 +636,6 @@ function hasPathFromFuenteToSumidero() {
 }
 */
 
-function iniciarAlgoritmo() {
-    // Check if there are nodes, fuente, and sumidero
-    if (nodes.length === 0) {
-        alert('No hay nodos en el grafo.');
-        return;
-    }
-
-    if (!fuenteNode) {
-        alert('No se ha seleccionado un nodo fuente.');
-        return;
-    }
-
-    if (!sumideroNode) {
-        alert('No se ha seleccionado un nodo sumidero.');
-        return;
-    }
-
-    /*
-    if(hasPathFromFuenteToSumidero() === false){
-        alert('No hay una trayectoria de la fuente al sumidero');
-        return;
-    }
-    */
-    // Hide the buttons
-    iniciarAlgoritmoButton.style.display = 'none';
-    clearGraphButton.style.display = 'none';
-    simpleDemoButton.style.display = 'none';
-    yetAnotherDemoButton.style.display = 'none';
-    grafoDemoButton.style.display = 'none';
-
-    algorithmStarted = true;
-    flujo_visualization()
-}
-
 function subscript(number) {
     const subscriptDigits = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
     return number.toString().split('').map(digit => subscriptDigits[parseInt(digit)]).join('');
@@ -687,6 +653,28 @@ async function flujo_respuesta_directa(){
 
 
 async function flujo_visualization(){
+    // Verificación de nodos, fuente y sumidero
+    if (nodes.length === 0) {
+        alert('No hay nodos en el grafo.');
+        return;
+    }
+    if (!fuenteNode) {
+        alert('No se ha seleccionado un nodo fuente.');
+        return;
+    }
+    if (!sumideroNode) {
+        alert('No se ha seleccionado un nodo sumidero.');
+        return;
+    }
+
+    // Ocultar botones una vez que el algoritmo empieza
+    iniciarAlgoritmoButton.style.display = 'none';
+    clearGraphButton.style.display = 'none';
+    simpleDemoButton.style.display = 'none';
+    yetAnotherDemoButton.style.display = 'none';
+    grafoDemoButton.style.display = 'none';
+
+    algorithmStarted = true;
     // Inicialización de flujos
     edges.forEach(edge => {
         edge.flujo = 0;
@@ -861,7 +849,144 @@ async function flujo_visualization(){
     }
 }
 
+async function flujo_visualization_trayectorias(){
+    // Inicialización de flujos
+    edges.forEach(edge => {
+        edge.flujo = 0;
+    });
+    console.log("Se inicializan los flujos en 0");
+    draw();
+    await delay(2500);
+    
+    let whileCount = 0;
+    while(true){
+        whileCount++;
+        console.log(`W1${subscript(whileCount)}:\n`);
+        
+        // Inicialización de etiquetas
 
+        nodes.forEach(node => {
+            node.value = null;
+            node.predecessor = null;
+        });
+        console.log("Se eliminan las etiquetas");
+        draw();
+        await delay(2000);
+        let U = [];
+
+        // Inicialización de la fuente
+        fuenteNode.value = Infinity;
+        fuenteNode.predecessor = "-";
+        U.push(fuenteNode);
+        let nestedWhileCount = 0;
+        while(sumideroNode.value === null){
+            nestedWhileCount++;
+            console.clear();
+            console.log(`W1${subscript(whileCount)}-W1${subscript(nestedWhileCount)}:\n`);
+            if(U.length === 0){
+                console.log("No hay más nodos en U");
+                await delay(2000);
+                console.clear();
+                draw();
+                mostrar_resultado();
+                return;
+            }
+
+            let u = U.shift();
+            let delta = u.value;
+            let i = 0
+            for (; i < edges.length; i++) {
+                const edge = edges[i];
+                
+                if (edge.startNode === u && edge.starting === u) {
+                    const v = edge.endNode;
+                    const residualCapacity = edge.label - edge.flujo;
+                    
+                    if(residualCapacity <= 0){
+                        continue;
+                    }
+
+                    if(v.value !== null){
+                        continue;
+                    }
+
+                    v.value = Math.min(u.value, residualCapacity);
+                    v.predecessor = u.label + "\u207A"; // Unicode for superscript plus sign
+                    U.push(v);
+                }
+            }
+
+            i = 0;
+            for (; i < edges.length; i++) {
+                const edge = edges[i];
+                if (edge.endNode === u && edge.starting !== u) {
+                    const v = edge.startNode;
+
+                    if(edge.flujo <= 0){
+                        continue;
+                    }
+
+                    if (v.value !== null) {
+                        continue;
+                    }
+
+                    v.value = Math.min(u.value, edge.flujo);
+                    v.predecessor = u.label + "\u207B"; 
+                    U.push(v);
+                }
+            }
+            if(sumideroNode.value !== null){
+                console.log("Se ha encontrado una trayectoria de la fuente al sumidero");
+                draw();
+                await delay(5000);
+                console.clear();
+            }
+        }
+        let v = sumideroNode;
+        let path = [v];
+        const printReversePath = () => path.map(node => node.label).reverse().join(" -> "); // Lambda function to print the path in reverse
+
+        let iteration = 1;
+        while(v.predecessor.replace(/\u207A|\u207B/g, '') !== "-"){
+            v = nodes.find(node => node.label === v.predecessor.replace(/\u207A|\u207B/g, ''));
+            path.push(v);
+            iteration++;
+        }
+
+        console.clear();
+        let tray = printReversePath();
+        let delta = sumideroNode.value;
+
+        console.log("Trayectoria encontrada:", tray);
+        trayectorias.push([tray, delta]);
+        await delay(4000);
+
+        // me quedé aquí
+        i = 0;
+        for (; i < path.length - 1; i++) {
+            console.log(`W1${subscript(whileCount)}-F2${subscript(i+1)}:\n`);
+            const u = path[i];
+            const v = path[i + 1];
+            console.log(`(${v.label}, ${u.label}): `);
+            const edge = edges.find(edge => edge.startNode === v && edge.endNode === u && edge.starting === v);
+            if (edge) {
+                edge.flujo += delta;
+                const inverseEdge = edges.find(edge => edge.startNode === u && edge.endNode === v && edge.starting === v);
+                inverseEdge.flujo += delta;
+                console.log(`Se aumenta el flujo en ${delta}`);
+            } else {
+                const edge = edges.find(edge => edge.startNode === u && edge.endNode === v && edge.starting === u);
+                const inverseEdge = edges.find(edge => edge.startNode === v && edge.endNode === u && edge.starting === u);
+                edge.flujo -= delta;
+                inverseEdge.flujo -= delta;
+                console.log(`Se disminuye el flujo en ${delta}`);
+            }
+
+        }
+        await delay(5000);
+        console.clear();
+    }
+}
 
 function sumar_flujo_maximo() {
     let sum = 0;
