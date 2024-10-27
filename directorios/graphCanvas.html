@@ -10,19 +10,18 @@
     <canvas id="graphCanvas" width="800" height="600"></canvas>
     <div style="display: flex; justify-content: center; gap: 20px;">
         <button id="iniciarAlgoritmo">Iniciar algoritmo</button>
-        <button id="demoButton">Grafo Demo</button>
-        <button id="simpleDemoButton">Simple Demo</button>
-        <button id="yetAnotherDemoButton">Yet Another Demo</button>
+        <button id="grafosButton">Grafos</button>
         <button id="clearGraphButton">Eliminar grafo</button> 
-        <div id="logs"></div> <!--recently added-->
+        <div id="logs"></div>
     </div>
+
     <div id="contextMenu">
         <ul>
             <li id="changeLabel">Change Label</li>
             <li id="connectNode">Connect Node</li>
             <li id="deleteNode">Delete Node</li>
             <li id="setFuente">Set as Fuente</li>
-            <li id="setSumidero">Set as Sumidero</li> 
+            <li id="setSumidero">Set as Sumidero</li>
         </ul>
     </div>
     <div id="contextMenuEdge">
@@ -31,6 +30,84 @@
             <li id="deleteEdge">Delete Edge</li>
         </ul>
     </div>
+
+    <div id="algorithmModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal">&times;</span>
+            <h3>Seleccione una opción</h3>
+            <button id="directResponseButton" class="modal-button">Respuesta directa</button>
+            <button id="visualizationButton" class="modal-button">Visualización</button>
+            <button id="visualizationTrayectoriasButton" class="modal-button">Mostrar trayectorias</button>
+        </div>
+    </div>
+
+    <div id="grafosModal" class="modal">
+        <div class="modal-content">
+            <span id="closeGrafosModal">&times;</span>
+            <h3>Seleccione un grafo</h3>
+            <button id="demoButton" class="modal-button">Grafo Demo</button>
+            <button id="simpleDemoButton" class="modal-button">Simple Demo</button>
+            <button id="yetAnotherDemoButton" class="modal-button">Yet Another Demo</button>
+        </div>
+    </div>
+
     <script src="../js/graph.js"></script>
+    <script>
+        document.getElementById("iniciarAlgoritmo").addEventListener("click", function() {
+            document.getElementById("algorithmModal").style.display = "block";
+        });
+
+        document.getElementById("grafosButton").addEventListener("click", function() {
+            document.getElementById("grafosModal").style.display = "block";
+        });
+
+        document.getElementById("closeModal").addEventListener("click", function() {
+            document.getElementById("algorithmModal").style.display = "none";
+        });
+
+        document.getElementById("closeGrafosModal").addEventListener("click", function() {
+            document.getElementById("grafosModal").style.display = "none";
+        });
+
+        window.onclick = function(event) {
+            const algorithmModal = document.getElementById("algorithmModal");
+            const grafosModal = document.getElementById("grafosModal");
+            if (event.target == algorithmModal) {
+                algorithmModal.style.display = "none";
+            } else if (event.target == grafosModal) {
+                grafosModal.style.display = "none";
+            }
+        };
+
+        document.getElementById("directResponseButton").addEventListener("click", function() {
+            document.getElementById("algorithmModal").style.display = "none";
+            flujo_respuesta_directa();
+        });
+
+        document.getElementById("visualizationButton").addEventListener("click", function() {
+            document.getElementById("algorithmModal").style.display = "none";
+            flujo_visualization();
+        });
+
+        document.getElementById("visualizationTrayectoriasButton").addEventListener("click", function() {
+            document.getElementById("algorithmModal").style.display = "none";
+            flujo_visualization_trayectorias();
+        });
+
+        document.getElementById("demoButton").addEventListener("click", function() {
+            document.getElementById("grafosModal").style.display = "none";
+            grafoDemo();
+        });
+
+        document.getElementById("simpleDemoButton").addEventListener("click", function() {
+            document.getElementById("grafosModal").style.display = "none";
+            simpleDemo();
+        });
+
+        document.getElementById("yetAnotherDemoButton").addEventListener("click", function() {
+            document.getElementById("grafosModal").style.display = "none";
+            yetAnotherDemo();
+        });
+    </script>
 </body>
 </html>
