@@ -29,7 +29,7 @@
             <li id="editEdgeLabel">Change Label</li>
             <li id="deleteEdge">Delete Edge</li>
         </ul>
-    </div>
+    </div>    
 
     <div id="algorithmModal" class="modal">
         <div class="modal-content">
@@ -52,62 +52,5 @@
     </div>
 
     <script src="../js/graph.js"></script>
-    <script>
-        document.getElementById("iniciarAlgoritmo").addEventListener("click", function() {
-            document.getElementById("algorithmModal").style.display = "block";
-        });
-
-        document.getElementById("grafosButton").addEventListener("click", function() {
-            document.getElementById("grafosModal").style.display = "block";
-        });
-
-        document.getElementById("closeModal").addEventListener("click", function() {
-            document.getElementById("algorithmModal").style.display = "none";
-        });
-
-        document.getElementById("closeGrafosModal").addEventListener("click", function() {
-            document.getElementById("grafosModal").style.display = "none";
-        });
-
-        window.onclick = function(event) {
-            const algorithmModal = document.getElementById("algorithmModal");
-            const grafosModal = document.getElementById("grafosModal");
-            if (event.target == algorithmModal) {
-                algorithmModal.style.display = "none";
-            } else if (event.target == grafosModal) {
-                grafosModal.style.display = "none";
-            }
-        };
-
-        document.getElementById("directResponseButton").addEventListener("click", function() {
-            document.getElementById("algorithmModal").style.display = "none";
-            flujo_respuesta_directa();
-        });
-
-        document.getElementById("visualizationButton").addEventListener("click", function() {
-            document.getElementById("algorithmModal").style.display = "none";
-            flujo_visualization();
-        });
-
-        document.getElementById("visualizationTrayectoriasButton").addEventListener("click", function() {
-            document.getElementById("algorithmModal").style.display = "none";
-            flujo_visualization_trayectorias();
-        });
-
-        document.getElementById("demoButton").addEventListener("click", function() {
-            document.getElementById("grafosModal").style.display = "none";
-            grafoDemo();
-        });
-
-        document.getElementById("simpleDemoButton").addEventListener("click", function() {
-            document.getElementById("grafosModal").style.display = "none";
-            simpleDemo();
-        });
-
-        document.getElementById("yetAnotherDemoButton").addEventListener("click", function() {
-            document.getElementById("grafosModal").style.display = "none";
-            yetAnotherDemo();
-        });
-    </script>
 </body>
 </html>

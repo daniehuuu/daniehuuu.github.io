@@ -5,33 +5,98 @@ const changeLabelOption = document.getElementById('changeLabel');
 const connectNodeOption = document.getElementById('connectNode');
 const deleteNodeOption = document.getElementById('deleteNode');
 const clearGraphButton = document.getElementById('clearGraphButton');
+const setFuenteOption = document.getElementById('setFuente');
+const setSumideroOption = document.getElementById('setSumidero');
+const logsDiv = document.getElementById('logs');
+const iniciarAlgoritmoButton = document.getElementById('iniciarAlgoritmo');
+const grafosButton = document.getElementById("grafosButton");
+const closeModal = document.getElementById("closeModal");
+const closeGrafosModal = document.getElementById("closeGrafosModal");
+const algorithmModal = document.getElementById("algorithmModal");
+const grafosModal = document.getElementById("grafosModal");
+const editEdgeLabelOption = document.getElementById('editEdgeLabel');
+const deleteEdgeOption = document.getElementById('deleteEdge');
+
+// Botones del modal de grafos
 const grafoDemoButton = document.getElementById('demoButton');
 const simpleDemoButton = document.getElementById('simpleDemoButton');
 const yetAnotherDemoButton = document.getElementById('yetAnotherDemoButton');
-const setFuenteOption = document.getElementById('setFuente'); // Option for Fuente
-const setSumideroOption = document.getElementById('setSumidero'); // Option for Sumidero
-const logsDiv = document.getElementById('logs');
-//const iniciarAlgoritmoButton = document.getElementById('iniciarAlgoritmo');
 
-//edges
-const contextMenuNode = document.getElementById('contextMenuNode');
-const contextMenuEdge = document.getElementById('contextMenuEdge');
-const editEdgeLabelOption = document.getElementById('editEdgeLabel');
-const deleteEdgeOption = document.getElementById('deleteEdge');
+// Botones del modal de algoritmo
+const directResponseButton = document.getElementById("directResponseButton");
+const visualizationButton = document.getElementById("visualizationButton");
+const visualizationTrayectoriasButton = document.getElementById("visualizationTrayectoriasButton");
 
 let nodes = [];
 let edges = [];
 let selectedNode = null;
-let selectedEdge = null; // Track the selected edge
+let selectedEdge = null;
 let isDragging = false;
 let nodeToConnect = null;
-let fuenteNode = null; // Track the current "Fuente" node
-let sumideroNode = null; // Track the current "Sumidero" node
+let fuenteNode = null;
+let sumideroNode = null;
 let algorithmStarted = false;
 let trayectorias = [];
 let noDelay = false;
 
+// Eventos para abrir y cerrar modales
+iniciarAlgoritmoButton.addEventListener("click", () => {
+    algorithmModal.style.display = "block";
+});
 
+grafosButton.addEventListener("click", () => {
+    grafosModal.style.display = "block";
+});
+
+closeModal.addEventListener("click", () => {
+    algorithmModal.style.display = "none";
+});
+
+closeGrafosModal.addEventListener("click", () => {
+    grafosModal.style.display = "none";
+});
+
+window.onclick = (event) => {
+    if (event.target === algorithmModal) {
+        algorithmModal.style.display = "none";
+    } else if (event.target === grafosModal) {
+        grafosModal.style.display = "none";
+    }
+};
+
+// Manejo de botones en el modal de algoritmo
+directResponseButton.addEventListener("click", () => {
+    algorithmModal.style.display = "none";
+    flujo_respuesta_directa();
+});
+
+visualizationButton.addEventListener("click", () => {
+    algorithmModal.style.display = "none";
+    flujo_visualization();
+});
+
+visualizationTrayectoriasButton.addEventListener("click", () => {
+    algorithmModal.style.display = "none";
+    flujo_visualization_trayectorias();
+});
+
+// Manejo de botones en el modal de grafos
+grafoDemoButton.addEventListener("click", () => {
+    grafosModal.style.display = "none";
+    grafoDemo();
+});
+
+simpleDemoButton.addEventListener("click", () => {
+    grafosModal.style.display = "none";
+    simpleDemo();
+});
+
+yetAnotherDemoButton.addEventListener("click", () => {
+    grafosModal.style.display = "none";
+    yetAnotherDemo();
+});
+
+// Eventos del canvas y del contexto del grafo
 canvas.addEventListener('dblclick', addNode);
 canvas.addEventListener('click', selectNode);
 canvas.addEventListener('mousedown', startDrag);
@@ -42,18 +107,14 @@ canvas.addEventListener('contextmenu', showContextMenu);
 changeLabelOption.addEventListener('click', changeLabel);
 connectNodeOption.addEventListener('click', connectNodes);
 deleteNodeOption.addEventListener('click', deleteNode);
-setFuenteOption.addEventListener('click', toggleFuenteNode); // Updated event listener
-setSumideroOption.addEventListener('click', toggleSumideroNode); // New event listener
+setFuenteOption.addEventListener('click', toggleFuenteNode);
+setSumideroOption.addEventListener('click', toggleSumideroNode);
 
-//edges
 editEdgeLabelOption.addEventListener('click', editEdgeLabel);
 deleteEdgeOption.addEventListener('click', deleteEdge);
 
-//iniciarAlgoritmoButton.addEventListener('click', iniciarAlgoritmo);
-grafoDemoButton.addEventListener('click', grafoDemo);
-simpleDemoButton.addEventListener('click', simpleDemo);
-yetAnotherDemoButton.addEventListener('click', yetAnotherDemo);
 clearGraphButton.addEventListener('click', clearGraph);
+
 
 function addNode(event) {
     const x = event.offsetX;
