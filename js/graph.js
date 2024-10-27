@@ -28,6 +28,7 @@ const directResponseButton = document.getElementById("directResponseButton");
 const visualizationButton = document.getElementById("visualizationButton");
 const visualizationTrayectoriasButton = document.getElementById("visualizationTrayectoriasButton");
 
+let id_1_1 = 0;
 let nodes = [];
 let edges = [];
 let selectedNode = null;
@@ -40,8 +41,29 @@ let algorithmStarted = false;
 let trayectorias = [];
 let noDelay = false;
 
+function ocultar_botones(){
+    // Ocultar botones una vez que el algoritmo empieza
+    iniciarAlgoritmoButton.style.display = 'none';
+    clearGraphButton.style.display = 'none';
+    grafosButton.style.display = 'none';
+
+    algorithmStarted = true;
+}
 // Eventos para abrir y cerrar modales
 iniciarAlgoritmoButton.addEventListener("click", () => {
+    // Verificación de nodos, fuente y sumidero
+    if (nodes.length === 0) {
+        alert('No hay nodos en el grafo.');
+        return;
+    }
+    if (!fuenteNode) {
+        alert('No se ha seleccionado un nodo fuente.');
+        return;
+    }
+    if (!sumideroNode) {
+        alert('No se ha seleccionado un nodo sumidero.');
+        return;
+    }
     algorithmModal.style.display = "block";
 });
 
@@ -67,16 +89,19 @@ window.onclick = (event) => {
 
 // Manejo de botones en el modal de algoritmo
 directResponseButton.addEventListener("click", () => {
+    ocultar_botones();
     algorithmModal.style.display = "none";
     flujo_respuesta_directa();
 });
 
 visualizationButton.addEventListener("click", () => {
+    ocultar_botones();
     algorithmModal.style.display = "none";
     flujo_visualization();
 });
 
 visualizationTrayectoriasButton.addEventListener("click", () => {
+    ocultar_botones();
     algorithmModal.style.display = "none";
     flujo_visualization_trayectorias();
 });
@@ -121,15 +146,16 @@ function addNode(event) {
     const x = event.offsetX;
     const y = event.offsetY;
     nodes.push({
-        id: nodes.length,
+        id: id_1_1,
         x,
         y,
-        label: `Node ${nodes.length}`,
+        label: `N${id_1_1}`,
         isFuente: false,
         isSumidero: false,
         predecessor: null,
         value: null
     });
+    id_1_1++;
     draw();
 }
 
@@ -654,8 +680,14 @@ function yetAnotherDemo() {
 }
 
 function clearGraph() {
+    id_1_1 = 0;
     nodes = [];
     edges = [];
+    selectedNode = null;
+    selectedEdge = null;
+    nodeToConnect = null;
+    fuenteNode = null;
+    sumideroNode = null;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -706,28 +738,6 @@ async function flujo_respuesta_directa() {
 
 
 async function flujo_visualization() {
-    // Verificación de nodos, fuente y sumidero
-    if (nodes.length === 0) {
-        alert('No hay nodos en el grafo.');
-        return;
-    }
-    if (!fuenteNode) {
-        alert('No se ha seleccionado un nodo fuente.');
-        return;
-    }
-    if (!sumideroNode) {
-        alert('No se ha seleccionado un nodo sumidero.');
-        return;
-    }
-
-    // Ocultar botones una vez que el algoritmo empieza
-    iniciarAlgoritmoButton.style.display = 'none';
-    clearGraphButton.style.display = 'none';
-    simpleDemoButton.style.display = 'none';
-    yetAnotherDemoButton.style.display = 'none';
-    grafoDemoButton.style.display = 'none';
-
-    algorithmStarted = true;
     // Inicialización de flujos
     edges.forEach(edge => {
         edge.flujo = 0;
@@ -946,7 +956,6 @@ async function flujo_visualization_trayectorias() {
             }
 
             let u = U.shift();
-            let delta = u.value;
             let i = 0
             for (; i < edges.length; i++) {
                 const edge = edges[i];
