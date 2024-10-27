@@ -443,16 +443,16 @@ function toggleFuenteNode() {
             selectedNode.isFuente = false;
             fuenteNode = null;
         } else {
+            if (someNodeConnectsNode(selectedNode)) {
+                alert('La fuente no puede tener conexiones de entrada');
+                return;
+            }
             if (fuenteNode) {
                 fuenteNode.isFuente = false;
             }
             if (selectedNode.isSumidero) {
                 selectedNode.isSumidero = false;
                 sumideroNode = null;
-            }
-            if (someNodeConnectsNode(selectedNode)) {
-                alert('La fuente no puede tener conexiones de entrada');
-                return;
             }
             selectedNode.isFuente = true;
             fuenteNode = selectedNode;
@@ -468,16 +468,16 @@ function toggleSumideroNode() {
             selectedNode.isSumidero = false;
             sumideroNode = null;
         } else {
+            if (nodeConnectsAnother(selectedNode)) {
+                alert('El sumidero no puede tener conexiones de salida');
+                return;
+            }
             if (sumideroNode) {
                 sumideroNode.isSumidero = false;
             }
             if (selectedNode.isFuente) {
                 selectedNode.isFuente = false;
                 fuenteNode = null;
-            }
-            if (nodeConnectsAnother(selectedNode)) {
-                alert('El sumidero no puede tener conexiones de salida');
-                return;
             }
             selectedNode.isSumidero = true;
             sumideroNode = selectedNode;
