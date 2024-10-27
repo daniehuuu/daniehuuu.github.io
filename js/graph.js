@@ -1,6 +1,7 @@
 const canvas = document.getElementById('graphCanvas');
 const ctx = canvas.getContext('2d');
 const contextMenu = document.getElementById('contextMenu');
+const contextMenuEdge = document.getElementById('contextMenuEdge');
 const changeLabelOption = document.getElementById('changeLabel');
 const connectNodeOption = document.getElementById('connectNode');
 const deleteNodeOption = document.getElementById('deleteNode');
@@ -119,15 +120,15 @@ clearGraphButton.addEventListener('click', clearGraph);
 function addNode(event) {
     const x = event.offsetX;
     const y = event.offsetY;
-    nodes.push({ 
-        id: nodes.length, 
-        x, 
-        y, 
-        label: `Node ${nodes.length}`, 
-        isFuente: false, 
-        isSumidero: false, 
-        predecessor: null, 
-        value: null 
+    nodes.push({
+        id: nodes.length,
+        x,
+        y,
+        label: `Node ${nodes.length}`,
+        isFuente: false,
+        isSumidero: false,
+        predecessor: null,
+        value: null
     });
     draw();
 }
@@ -198,13 +199,13 @@ function connectNodes() {
             draw();
             return;
         }
-        if(selectedNode.isFuente){
+        if (selectedNode.isFuente) {
             alert('La fuente no puede ser un nodo de entrada');
             nodeToConnect = null;
             draw();
             return;
         }
-        if(nodeToConnect.isSumidero){
+        if (nodeToConnect.isSumidero) {
             alert('El sumidero no puede ser un nodo de salida');
             nodeToConnect = null;
             draw();
@@ -223,7 +224,7 @@ function connectNodes() {
             }
         } while (!isPositiveNumber(edgeLabel) && !infOp.includes(edgeLabel));
 
-        if(infOp.includes(edgeLabel)){
+        if (infOp.includes(edgeLabel)) {
             edgeLabel = Infinity;
         }
         // Store both directions internally
@@ -246,17 +247,17 @@ function connectNodes() {
 function deleteNode() {
     if (!selectedNode) return;
 
-    if(selectedNode.isFuente){
+    if (selectedNode.isFuente) {
         fuenteNode = null;
     }
 
-    if(selectedNode.isSumidero){
+    if (selectedNode.isSumidero) {
         sumideroNode = null;
     }
 
     nodes = nodes.filter(node => node !== selectedNode);
     edges = edges.filter(edge => edge.startNode !== selectedNode && edge.endNode !== selectedNode);
-    
+
     nodeToConnect = null;
 
     draw();
@@ -277,7 +278,7 @@ function getEdgeAt(x, y) {
 
 function editEdgeLabel() {
     let newLabel;
-    let infOp = ["inf", "infty", "infinity"];
+    let infOp = ["inf", "infty", "infinity", "infinito"];
     do {
         newLabel = prompt('Enter new edge label (positive integer):', selectedEdge.label);
         if (newLabel === null) {
@@ -287,7 +288,7 @@ function editEdgeLabel() {
         }
     } while (!isPositiveNumber(newLabel) && !infOp.includes(newLabel));
 
-    if(infOp.includes(newLabel)){
+    if (infOp.includes(newLabel)) {
         newLabel = Infinity;
     }
 
@@ -306,8 +307,8 @@ function deleteEdge() {
 }
 
 canvas.addEventListener('click', () => {
-    if (contextMenuNode) {
-        contextMenuNode.style.display = 'none';
+    if (contextMenu) {
+        contextMenu.style.display = 'none';
     }
     if (contextMenuEdge) {
         contextMenuEdge.style.display = 'none';
@@ -323,8 +324,8 @@ canvas.addEventListener('contextmenu', function (event) {
     } else if (getNodeAt(x, y)) {
         showContextMenu(event);
     } else {
-        if (contextMenuNode) {
-            contextMenuNode.style.display = 'none';
+        if (contextMenu) {
+            contextMenu.style.display = 'none';
         }
         if (contextMenuEdge) {
             contextMenuEdge.style.display = 'none';
@@ -332,7 +333,7 @@ canvas.addEventListener('contextmenu', function (event) {
     }
 });
 
-canvas.addEventListener('contextmenu', function(event) {
+canvas.addEventListener('contextmenu', function (event) {
     event.preventDefault();
     if (algorithmStarted) {
         return; // Do not open context menu if algorithm has started
@@ -420,7 +421,7 @@ function toggleFuenteNode() {
                 selectedNode.isSumidero = false;
                 sumideroNode = null;
             }
-            if(someNodeConnectsNode(selectedNode)){
+            if (someNodeConnectsNode(selectedNode)) {
                 alert('La fuente no puede tener conexiones de entrada');
                 return;
             }
@@ -445,7 +446,7 @@ function toggleSumideroNode() {
                 selectedNode.isFuente = false;
                 fuenteNode = null;
             }
-            if(nodeConnectsAnother(selectedNode)){
+            if (nodeConnectsAnother(selectedNode)) {
                 alert('El sumidero no puede tener conexiones de salida');
                 return;
             }
@@ -485,9 +486,9 @@ function drawNode(node) {
     if (node.value !== null && node.predecessor !== undefined) {
         ctx.save();
         ctx.font = '16px Arial';
-        if(node.value === Infinity){
+        if (node.value === Infinity) {
             ctx.fillText(`[${node.predecessor}; ∞]`, node.x - 15, node.y - 22);
-        }else{
+        } else {
             ctx.fillText(`[${node.predecessor}; ${node.value}]`, node.x - 15, node.y - 22);
         }
         ctx.restore();
@@ -543,18 +544,18 @@ function drawEdge(edge) {
             ctx.fillStyle = 'white'; // Set fill color
 
             if (typeof flujo !== 'undefined') {
-                if(label === Infinity){
+                if (label === Infinity) {
                     ctx.strokeText(`∞/${flujo}`, midX, midY);
                     ctx.fillText(`∞/${flujo}`, midX, midY);
-                }else{
+                } else {
                     ctx.strokeText(`${label}/${flujo}`, midX, midY);
                     ctx.fillText(`${label}/${flujo}`, midX, midY);
                 }
             } else {
-                if(label === Infinity){
+                if (label === Infinity) {
                     ctx.strokeText(`∞`, midX, midY);
                     ctx.fillText(`∞`, midX, midY);
-                }else{
+                } else {
                     ctx.strokeText(label, midX, midY);
                     ctx.fillText(label, midX, midY);
                 }
@@ -565,18 +566,18 @@ function drawEdge(edge) {
     }
 }
 
-function grafoDemo(){
-    var halfHeight = canvas.height/2;
-    nodes.push({ id: "a", x: 100, y: halfHeight, label: 'a', isFuente: true, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "A", x: 300, y: halfHeight - 200, label: 'A', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "B", x: 300, y: halfHeight, label: 'B', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "C", x: 300, y: 200 + halfHeight, label: 'C', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "Z1", x: 450, y: halfHeight - 200, label: 'Z1', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "Z2", x: 550, y: halfHeight, label: 'Z2', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "Z3", x: 450, y: 270 + halfHeight, label: 'Z3', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "Z", x: 700, y: halfHeight, label: 'Z', isFuente: false, isSumidero: true, predecessor: null, value: null});
- 
- 
+function grafoDemo() {
+    var halfHeight = canvas.height / 2;
+    nodes.push({ id: "a", x: 100, y: halfHeight, label: 'a', isFuente: true, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "A", x: 300, y: halfHeight - 200, label: 'A', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "B", x: 300, y: halfHeight, label: 'B', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "C", x: 300, y: 200 + halfHeight, label: 'C', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "Z1", x: 450, y: halfHeight - 200, label: 'Z1', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "Z2", x: 550, y: halfHeight, label: 'Z2', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "Z3", x: 450, y: 270 + halfHeight, label: 'Z3', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "Z", x: 700, y: halfHeight, label: 'Z', isFuente: false, isSumidero: true, predecessor: null, value: null });
+
+
     edges.push({ startNode: nodes[0], endNode: nodes[1], label: 1, starting: nodes[0] });
     edges.push({ startNode: nodes[0], endNode: nodes[2], label: 1, starting: nodes[0] });
     edges.push({ startNode: nodes[0], endNode: nodes[3], label: 1, starting: nodes[0] });
@@ -588,34 +589,34 @@ function grafoDemo(){
     edges.push({ startNode: nodes[4], endNode: nodes[7], label: 1, starting: nodes[4] });
     edges.push({ startNode: nodes[5], endNode: nodes[7], label: 1, starting: nodes[5] });
     edges.push({ startNode: nodes[6], endNode: nodes[7], label: 1, starting: nodes[6] });
-    
-    edges.push({ startNode: nodes[1] , endNode: nodes[0], label: 1, starting: nodes[0] });
-    edges.push({ startNode: nodes[2] , endNode: nodes[0], label: 1, starting: nodes[0] });
-    edges.push({ startNode: nodes[3] , endNode: nodes[0], label: 1, starting: nodes[0] });
-    edges.push({ startNode: nodes[4] , endNode: nodes[1], label: 1, starting: nodes[1] });
-    edges.push({ startNode: nodes[6] , endNode: nodes[1], label: 1, starting: nodes[1] });
-    edges.push({ startNode: nodes[4] , endNode: nodes[2], label: 1, starting: nodes[2] });
-    edges.push({ startNode: nodes[5] , endNode: nodes[2], label: 1, starting: nodes[2] });
-    edges.push({ startNode: nodes[4] , endNode: nodes[3], label: 1, starting: nodes[3] });
-    edges.push({ startNode: nodes[7] , endNode: nodes[4], label: 1, starting: nodes[4] });
-    edges.push({ startNode: nodes[7] , endNode: nodes[5], label: 1, starting: nodes[5] });
-    edges.push({ startNode: nodes[7] , endNode: nodes[6], label: 1, starting: nodes[6] });
- 
+
+    edges.push({ startNode: nodes[1], endNode: nodes[0], label: 1, starting: nodes[0] });
+    edges.push({ startNode: nodes[2], endNode: nodes[0], label: 1, starting: nodes[0] });
+    edges.push({ startNode: nodes[3], endNode: nodes[0], label: 1, starting: nodes[0] });
+    edges.push({ startNode: nodes[4], endNode: nodes[1], label: 1, starting: nodes[1] });
+    edges.push({ startNode: nodes[6], endNode: nodes[1], label: 1, starting: nodes[1] });
+    edges.push({ startNode: nodes[4], endNode: nodes[2], label: 1, starting: nodes[2] });
+    edges.push({ startNode: nodes[5], endNode: nodes[2], label: 1, starting: nodes[2] });
+    edges.push({ startNode: nodes[4], endNode: nodes[3], label: 1, starting: nodes[3] });
+    edges.push({ startNode: nodes[7], endNode: nodes[4], label: 1, starting: nodes[4] });
+    edges.push({ startNode: nodes[7], endNode: nodes[5], label: 1, starting: nodes[5] });
+    edges.push({ startNode: nodes[7], endNode: nodes[6], label: 1, starting: nodes[6] });
+
     fuenteNode = nodes[0];
     sumideroNode = nodes[7];
-    
+
     draw();
 }
 
-function simpleDemo(){
-    const halfHeight = canvas.height/2;
-    nodes.push({ id: "s", x: 100, y: halfHeight, label: 's', isFuente: true, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "A", x: 300, y: halfHeight - 150, label: 'A', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "B", x: 400, y: halfHeight, label: 'B', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "C", x: 300, y: halfHeight + 110, label: 'C', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "D", x: 500, y: halfHeight + 100, label: 'D', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "t", x: canvas.width - 100, y: halfHeight, label: 't', isFuente: false, isSumidero: true, predecessor: null, value: null});
-    
+function simpleDemo() {
+    const halfHeight = canvas.height / 2;
+    nodes.push({ id: "s", x: 100, y: halfHeight, label: 's', isFuente: true, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "A", x: 300, y: halfHeight - 150, label: 'A', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "B", x: 400, y: halfHeight, label: 'B', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "C", x: 300, y: halfHeight + 110, label: 'C', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "D", x: 500, y: halfHeight + 100, label: 'D', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "t", x: canvas.width - 100, y: halfHeight, label: 't', isFuente: false, isSumidero: true, predecessor: null, value: null });
+
     //s -> A (3.5), s -> B (4), s -> c (5), A -> B (2.3), A -> t (1), C -> B (2), D -> B (infinity), D -> t (3)
     edges.push({ startNode: nodes[0], endNode: nodes[1], label: 3.5, starting: nodes[0] });
     edges.push({ startNode: nodes[0], endNode: nodes[2], label: 4, starting: nodes[0] });
@@ -641,15 +642,15 @@ function simpleDemo(){
     draw();
 }
 
-function yetAnotherDemo(){
-    var halfHeight = canvas.height/2;
-    nodes.push({ id: "s", x: 100, y: halfHeight, label: 's', isFuente: true, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "A", x: 300, y: halfHeight - 200, label: 'A', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "B", x: 300, y: 200 + halfHeight, label: 'B', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "Y", x: 450, y: halfHeight - 200, label: 'Y', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "X", x: 550, y: halfHeight, label: 'X', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "Z", x: 450, y: 200 + halfHeight, label: 'Z', isFuente: false, isSumidero: false, predecessor: null, value: null});
-    nodes.push({ id: "t", x: 700, y: halfHeight, label: 't', isFuente: false, isSumidero: true, predecessor: null, value: null});
+function yetAnotherDemo() {
+    var halfHeight = canvas.height / 2;
+    nodes.push({ id: "s", x: 100, y: halfHeight, label: 's', isFuente: true, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "A", x: 300, y: halfHeight - 200, label: 'A', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "B", x: 300, y: 200 + halfHeight, label: 'B', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "Y", x: 450, y: halfHeight - 200, label: 'Y', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "X", x: 550, y: halfHeight, label: 'X', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "Z", x: 450, y: 200 + halfHeight, label: 'Z', isFuente: false, isSumidero: false, predecessor: null, value: null });
+    nodes.push({ id: "t", x: 700, y: halfHeight, label: 't', isFuente: false, isSumidero: true, predecessor: null, value: null });
 
     // s -> A (2), s -> B (12), A -> B (3), A -> Y (8), B -> Z (10), Z -> A (6), Y -> X (7), X -> Z (1), Y -> t (2), X -> t(6), Z -> t (5)
     edges.push({ startNode: nodes[0], endNode: nodes[1], label: 2, starting: nodes[0] });
@@ -675,7 +676,7 @@ function yetAnotherDemo(){
     edges.push({ startNode: nodes[6], endNode: nodes[3], label: 2, starting: nodes[3] });
     edges.push({ startNode: nodes[6], endNode: nodes[4], label: 7, starting: nodes[4] });
     edges.push({ startNode: nodes[6], endNode: nodes[5], label: 5, starting: nodes[5] });
-    
+
     fuenteNode = nodes[0];
     sumideroNode = nodes[6];
 
@@ -723,18 +724,18 @@ function subscript(number) {
     return number.toString().split('').map(digit => subscriptDigits[parseInt(digit)]).join('');
 }
 
-function infLabel(label){
+function infLabel(label) {
     return (label === Infinity) ? "∞" : label;
 }
 
-async function flujo_respuesta_directa(){
+async function flujo_respuesta_directa() {
     noDelay = true;
     await flujo_visualization();
     noDelay = false;
 }
 
 
-async function flujo_visualization(){
+async function flujo_visualization() {
     // Verificación de nodos, fuente y sumidero
     if (nodes.length === 0) {
         alert('No hay nodos en el grafo.');
@@ -764,12 +765,12 @@ async function flujo_visualization(){
     console.log("Se inicializan los flujos en 0");
     draw();
     await delay(2500);
-    
+
     let whileCount = 0;
-    while(true){
+    while (true) {
         whileCount++;
         console.log(`W1${subscript(whileCount)}:\n`);
-        
+
         // Inicialización de etiquetas
 
         nodes.forEach(node => {
@@ -791,11 +792,11 @@ async function flujo_visualization(){
         await delay(3000);
 
         let nestedWhileCount = 0;
-        while(sumideroNode.value === null){
+        while (sumideroNode.value === null) {
             nestedWhileCount++;
             console.clear();
             console.log(`W1${subscript(whileCount)}-W1${subscript(nestedWhileCount)}:\n`);
-            if(U.length === 0){
+            if (U.length === 0) {
                 console.log("No hay más nodos en U");
                 await delay(2000);
                 console.clear();
@@ -814,21 +815,21 @@ async function flujo_visualization(){
             let i = 0
             for (; i < edges.length; i++) {
                 const edge = edges[i];
-                
+
                 if (edge.startNode === u && edge.starting === u) {
-                    console.log(`W1${subscript(whileCount)}-W1${subscript(nestedWhileCount)}-F1${subscript(i+1)}:\n`);
+                    console.log(`W1${subscript(whileCount)}-W1${subscript(nestedWhileCount)}-F1${subscript(i + 1)}:\n`);
                     const v = edge.endNode;
                     const residualCapacity = edge.label - edge.flujo;
 
                     console.log(`(${u.label}, ${v.label}): `);
-                    
-                    if(residualCapacity <= 0){
+
+                    if (residualCapacity <= 0) {
                         console.log(`La capacidad residual es muy baja: ${residualCapacity}`);
                         await delay(3000);
                         continue;
                     }
 
-                    if(v.value !== null){
+                    if (v.value !== null) {
                         console.log(`El nodo ${v.label} ya está etiquetado`);
                         await delay(3000);
                         continue;
@@ -836,7 +837,7 @@ async function flujo_visualization(){
 
                     v.value = Math.min(u.value, residualCapacity);
                     v.predecessor = u.label + "\u207A"; // Unicode for superscript plus sign
-                    
+
                     U.push(v);
                     draw();
                     console.log(`${v.label} no está conectado y la capacidad residual es ${infLabel(edge.label)} - ${edge.flujo} = ${infLabel(residualCapacity)}`);
@@ -851,11 +852,11 @@ async function flujo_visualization(){
             for (; i < edges.length; i++) {
                 const edge = edges[i];
                 if (edge.endNode === u && edge.starting !== u) {
-                    console.log(`W1${subscript(whileCount)}-W1${subscript(nestedWhileCount)}-F2${subscript(i+1)}:\n`);
+                    console.log(`W1${subscript(whileCount)}-W1${subscript(nestedWhileCount)}-F2${subscript(i + 1)}:\n`);
                     const v = edge.startNode;
                     console.log(`(${v.label}, ${u.label}): `);
 
-                    if(edge.flujo <= 0){
+                    if (edge.flujo <= 0) {
                         console.log(`El flujo es muy bajo: ${edge.flujo} > 0 (falso)`);
                         await delay(3000);
                         continue;
@@ -868,7 +869,7 @@ async function flujo_visualization(){
                     }
 
                     v.value = Math.min(u.value, edge.flujo);
-                    v.predecessor = u.label + "\u207B"; 
+                    v.predecessor = u.label + "\u207B";
                     U.push(v);
                     draw();
                     console.log(`El flujo es mayor que 0 y ${v.label} no está etiquetado`);
@@ -876,7 +877,7 @@ async function flujo_visualization(){
                     await delay(3500);
                 }
             }
-            if(sumideroNode.value !== null){
+            if (sumideroNode.value !== null) {
                 console.log("Se ha encontrado una trayectoria de la fuente al sumidero");
                 await delay(2000);
                 console.clear();
@@ -890,7 +891,7 @@ async function flujo_visualization(){
         console.log(`Empezamos en: ${printReversePath()}`);
         let iteration = 1;
         await delay(2000);
-        while(v.predecessor.replace(/\u207A|\u207B/g, '') !== "-"){
+        while (v.predecessor.replace(/\u207A|\u207B/g, '') !== "-") {
             v = nodes.find(node => node.label === v.predecessor.replace(/\u207A|\u207B/g, ''));
             path.push(v);
             console.log(`W1${subscript(whileCount)}-W2${subscript(iteration)}: ${printReversePath()}`);
@@ -907,7 +908,7 @@ async function flujo_visualization(){
         await delay(4000);
         i = 0;
         for (; i < path.length - 1; i++) {
-            console.log(`W1${subscript(whileCount)}-F2${subscript(i+1)}:\n`);
+            console.log(`W1${subscript(whileCount)}-F2${subscript(i + 1)}:\n`);
             const u = path[i];
             const v = path[i + 1];
             console.log(`(${v.label}, ${u.label}): `);
@@ -931,7 +932,7 @@ async function flujo_visualization(){
     }
 }
 
-async function flujo_visualization_trayectorias(){
+async function flujo_visualization_trayectorias() {
     // Inicialización de flujos
     edges.forEach(edge => {
         edge.flujo = 0;
@@ -939,12 +940,12 @@ async function flujo_visualization_trayectorias(){
     console.log("Se inicializan los flujos en 0");
     draw();
     await delay(2500);
-    
+
     let whileCount = 0;
-    while(true){
+    while (true) {
         whileCount++;
         console.log(`W1${subscript(whileCount)}:\n`);
-        
+
         // Inicialización de etiquetas
 
         nodes.forEach(node => {
@@ -961,11 +962,11 @@ async function flujo_visualization_trayectorias(){
         fuenteNode.predecessor = "-";
         U.push(fuenteNode);
         let nestedWhileCount = 0;
-        while(sumideroNode.value === null){
+        while (sumideroNode.value === null) {
             nestedWhileCount++;
             console.clear();
             console.log(`W1${subscript(whileCount)}-W1${subscript(nestedWhileCount)}:\n`);
-            if(U.length === 0){
+            if (U.length === 0) {
                 console.log("No hay más nodos en U");
                 await delay(2000);
                 console.clear();
@@ -979,16 +980,16 @@ async function flujo_visualization_trayectorias(){
             let i = 0
             for (; i < edges.length; i++) {
                 const edge = edges[i];
-                
+
                 if (edge.startNode === u && edge.starting === u) {
                     const v = edge.endNode;
                     const residualCapacity = edge.label - edge.flujo;
-                    
-                    if(residualCapacity <= 0){
+
+                    if (residualCapacity <= 0) {
                         continue;
                     }
 
-                    if(v.value !== null){
+                    if (v.value !== null) {
                         continue;
                     }
 
@@ -1004,7 +1005,7 @@ async function flujo_visualization_trayectorias(){
                 if (edge.endNode === u && edge.starting !== u) {
                     const v = edge.startNode;
 
-                    if(edge.flujo <= 0){
+                    if (edge.flujo <= 0) {
                         continue;
                     }
 
@@ -1013,11 +1014,11 @@ async function flujo_visualization_trayectorias(){
                     }
 
                     v.value = Math.min(u.value, edge.flujo);
-                    v.predecessor = u.label + "\u207B"; 
+                    v.predecessor = u.label + "\u207B";
                     U.push(v);
                 }
             }
-            if(sumideroNode.value !== null){
+            if (sumideroNode.value !== null) {
                 console.log("Se ha encontrado una trayectoria de la fuente al sumidero");
                 draw();
                 await delay(5000);
@@ -1029,7 +1030,7 @@ async function flujo_visualization_trayectorias(){
         const printReversePath = () => path.map(node => node.label).reverse().join(" -> "); // Lambda function to print the path in reverse
 
         let iteration = 1;
-        while(v.predecessor.replace(/\u207A|\u207B/g, '') !== "-"){
+        while (v.predecessor.replace(/\u207A|\u207B/g, '') !== "-") {
             v = nodes.find(node => node.label === v.predecessor.replace(/\u207A|\u207B/g, ''));
             path.push(v);
             iteration++;
@@ -1046,7 +1047,7 @@ async function flujo_visualization_trayectorias(){
         // me quedé aquí
         i = 0;
         for (; i < path.length - 1; i++) {
-            console.log(`W1${subscript(whileCount)}-F2${subscript(i+1)}:\n`);
+            console.log(`W1${subscript(whileCount)}-F2${subscript(i + 1)}:\n`);
             const u = path[i];
             const v = path[i + 1];
             console.log(`(${v.label}, ${u.label}): `);
@@ -1070,14 +1071,53 @@ async function flujo_visualization_trayectorias(){
     }
 }
 
-function sumar_flujo_maximo() {
-    let sum = 0;
+
+function sum_flow(list) {
+    var sum = list.reduce((a, b) => a + b, 0);
+    var str = "";
+
+    if (list.length <= 1) {
+        str += sum;
+    } else {
+        str += list.join(" + ") + " = " + sum;
+    }
+
+    return str;
+}
+
+function get_flujo_maximo() {
+    var fuente_connections = [], sumidero_connections = [];
     edges.forEach(edge => {
-        if (edge.endNode === sumideroNode) {
-            sum += edge.flujo;
+        if (edge.endNode === sumideroNode && edge.starting != sumideroNode) {
+            sumidero_connections.push(edge);
+        }
+        if (edge.startNode === fuenteNode && edge.starting === fuenteNode) {
+            fuente_connections.push(edge);
         }
     });
-   return sum;
+
+    var sum_fuente = [], sum_sumidero = [];
+
+    var str_FM_fuente = "|f| a partir de la fuente:\n";
+    var str_FM_sumidero = "|f| a partir del sumidero:\n";
+    fuente_connections.forEach(edge => {
+        str_FM_fuente += `(${edge.startNode.label}, ${edge.endNode.label}), `;
+        str_FM_fuente += `|f| += ${edge.flujo}\n`;
+        sum_fuente.push(edge.flujo);
+    });
+
+    sumidero_connections.forEach(edge => {
+        str_FM_sumidero += `(${edge.startNode.label}, ${edge.endNode.label}), `;
+        str_FM_sumidero += `|f| += ${edge.flujo}\n`;
+        sum_sumidero.push(edge.flujo);
+    });
+
+    var sum = sum_fuente.reduce((a, b) => a + b, 0);
+
+    str_FM_fuente += "|f| = " + sum_flow(sum_fuente);
+    str_FM_sumidero += "|f| = " + sum_flow(sum_sumidero);
+
+    return { str_FM_fuente, str_FM_sumidero, sum};
 }
 
 function getMinCutNodes() {
@@ -1117,7 +1157,7 @@ function drawMinCut(minCutEdges) {
         ctx.strokeStyle = 'green';
         ctx.lineWidth = 3;
 
-        if(edge.starting != edge.startNode){
+        if (edge.starting != edge.startNode) {
             var tmp = startNode;
             startNode = endNode;
             endNode = tmp;
@@ -1176,15 +1216,17 @@ function drawMinCut(minCutEdges) {
     ctx.lineWidth = 1;
 }
 
+function mostrar_resultado() {
+    var {str_FM_fuente: detail_fuente, str_FM_sumidero: detail_sumidero, sum: max_flow} = get_flujo_maximo();
 
-function mostrar_resultado(){
-    let maxFlow = sumar_flujo_maximo();
-    let result = `El flujo máximo es ${maxFlow} 
+    let result = `El flujo máximo es ${max_flow} 
                 \nLas trayectorias usadas son:`;
 
     trayectorias.forEach(trayectoria => {
         result += `\n${trayectoria[0]} con un flujo de ${trayectoria[1]}`;
     });
+
+    result += "\n\n" + detail_fuente + "\n\n" + detail_sumidero;
 
     const { labelledNodes: minCutStartingNodes, notLabelledNodes: minCutEndingNodes } = getMinCutNodes();
 
@@ -1200,25 +1242,19 @@ function mostrar_resultado(){
 
     var flujo_max_minimun_cut = [];
     minimun_cut.forEach(edge => {
-        if(edge.starting === edge.startNode){
+        if (edge.starting === edge.startNode) {
             result += `(${edge.startNode.label}, ${edge.endNode.label}), `;
             result += `|f| += ${edge.flujo}\n`;
             flujo_max_minimun_cut.push(edge.flujo);
-        }else{
+        } else {
             result += `(${edge.endNode.label}, ${edge.startNode.label}), `;
             result += `flujo = ${edge.flujo}\n`;
         }
     });
 
     result += "|f| del corte mínimo = ";
-    var sum_minimun_cut = flujo_max_minimun_cut.reduce((a, b) => a + b, 0);
+    result += sum_flow(flujo_max_minimun_cut);
 
-    if (flujo_max_minimun_cut.length <= 1){
-        result += sum_minimun_cut;
-    }else{
-        result += flujo_max_minimun_cut.join(" + ") + " = " + sum_minimun_cut;
-    }
-  
     drawMinCut(minimun_cut);
 
     console.log(result);
