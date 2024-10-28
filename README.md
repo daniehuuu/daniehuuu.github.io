@@ -10,4 +10,4 @@ Proyecto (TB1) de Matemática Computacional (MA475) de la UPC.
  - [ ] Drawing the minimun cut.
  - [ ] Handle the graph as a data structure 
  - [ ] Follow the colorset procedure of the "bosquejo"
- - [ ] User manual input integrity.
+ - [ ] User manual input integrity: there is a bug while finding the trayectoria this leads to bug if there is duplicated node labels.
