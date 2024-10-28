@@ -11,6 +11,7 @@ const setSumideroOption = document.getElementById('setSumidero');
 const logsDiv = document.getElementById('logs');
 const iniciarAlgoritmoButton = document.getElementById('iniciarAlgoritmo');
 const grafosButton = document.getElementById("grafosButton");
+const resetButton = document.getElementById("resetButton");
 const closeModal = document.getElementById("closeModal");
 const closeGrafosModal = document.getElementById("closeGrafosModal");
 const algorithmModal = document.getElementById("algorithmModal");
@@ -40,6 +41,9 @@ let sumideroNode = null;
 let algorithmStarted = false;
 let trayectorias = [];
 let noDelay = false;
+let AbortController;
+
+resetButton.style.display = 'none';
 
 function ocultar_botones(){
     // Ocultar botones una vez que el algoritmo empieza
@@ -48,6 +52,30 @@ function ocultar_botones(){
     grafosButton.style.display = 'none';
 
     algorithmStarted = true;
+}
+
+function mostrar_botones(){
+    // Mostrar botones una vez que el algoritmo termina
+    iniciarAlgoritmoButton.style.display = 'block';
+    clearGraphButton.style.display = 'block';
+    grafosButton.style.display = 'block';
+}
+
+function reiniciar(){
+    mostrar_botones();
+    edges.forEach(edge => {
+        resetLabelE(edge);
+    });
+    nodes.forEach(node => {
+        resetLabelN(node);
+    });
+    trayectorias = [];
+    algorithmStarted = false;
+    noDelay = false;
+    resetButton.style.display = 'none';
+    console.clear();
+
+    draw();
 }
 // Eventos para abrir y cerrar modales
 iniciarAlgoritmoButton.addEventListener("click", () => {
@@ -65,6 +93,12 @@ iniciarAlgoritmoButton.addEventListener("click", () => {
         return;
     }
     algorithmModal.style.display = "block";
+});
+
+resetButton.addEventListener("click", () => {
+    if(algorithmStarted){
+        reiniciar();
+    }
 });
 
 grafosButton.addEventListener("click", () => {
@@ -91,18 +125,21 @@ window.onclick = (event) => {
 directResponseButton.addEventListener("click", () => {
     ocultar_botones();
     algorithmModal.style.display = "none";
+    resetButton.style.display = 'block';
     flujo_respuesta_directa();
 });
 
 visualizationButton.addEventListener("click", () => {
     ocultar_botones();
     algorithmModal.style.display = "none";
+    resetButton.style.display = 'block';
     flujo_visualization();
 });
 
 visualizationTrayectoriasButton.addEventListener("click", () => {
     ocultar_botones();
     algorithmModal.style.display = "none";
+    resetButton.style.display = 'block';
     flujo_visualization_trayectorias();
 });
 
@@ -1457,7 +1494,6 @@ function mostrar_resultado() {
     result += "|f| del corte mínimo = ";
     result += sum_flow(flujo_max_minimun_cut);
 
-    console.log(minimun_cut);
     drawMinCut(minimun_cut);
     draw();
 
